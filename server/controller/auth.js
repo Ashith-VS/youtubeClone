@@ -47,11 +47,10 @@ export const isSignUp = async (req, res) => {
 }
 
 
-
 export const isGoogleAuth = async (req, res) => {
     try {
 
     } catch (error) {
-
+        res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
     }
 }

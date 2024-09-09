@@ -4,11 +4,11 @@ const router = express.Router();
 import authRoutes from "./auth.js"
 import userRoutes from "./user.js"
 import videoRoutes from "./video.js"
-// import commentRoutes from "./comment"
+import commentRoutes from "./comment.js"
 
 router.use('/api/auth',authRoutes)
-router.use('/api/users',userRoutes)
+router.use('/api/user',userRoutes)
 router.use('/api/video',videoRoutes)
-// router.use('/api/comment',commentRoutes)
+router.use('/api/comment',commentRoutes)
 
 export default router;

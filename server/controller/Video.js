@@ -1,3 +1,4 @@
+import User from "../model/User.js"
 import Video from "../model/Video.js"
 
 export const addVideo =async(req,res)=>{
@@ -82,9 +83,33 @@ export const trendVideo =async(req,res)=>{
 
 export const subscribedVideo =async(req,res)=>{
     try {
-        const video = await Video.findById(req.params.id)
-        if(!video) return res.status(404).json({message: 'Video not found'})
-        res.status(200).json(video)
+        const user = await User.findById(req.user.id)
+        const subscribedChannels = await user.subscribedChannels
+        const list =await Promise.all(subscribedChannels.map(chanelId=>{
+            return Video.find({userId:chanelId})
+        }))
+        res.status(200).json(list)
+        // res.status(200).json(list.flat().sort(a,b)=>b.createdAt-a.createdAt)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+export const getByTags =async(req,res)=>{
+    const tags=req.query.tags.split(',')
+    try {
+        const videos = await Video.find({tags:{$in:tags}}).limit(20)
+        res.status(200).json(videos)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+export const getBySearch =async(req,res)=>{
+    const query = req.query.q
+    try {
+        const videos = await Video.find({title:{$regex:query,$options:"i"}}).limit(40)
+        res.status(200).json(videos)
     } catch (error) {
         res.status(500).json({message: error.message})
     }
