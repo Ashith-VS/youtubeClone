@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import { Link } from "react-router-dom";
-
+import {format} from "timeago.js"
+import networkRequest from '../http/api';
+import { UrlEndPoint } from '../http/apiConfig';
 const Container = styled.div`
   width: ${(props) => props.type !== "sm" && "360px"};
   margin-bottom: ${(props) => (props.type === "sm" ? "10px" : "45px")};
@@ -50,25 +52,41 @@ const Info = styled.div`
   font-size: 14px;
   color: ${({ theme }) => theme.textSoft};
 `;
-const Card = ({type}) => {
-  // console.log('type: ', type);
+const Card = ({type,video}) => {
+
+  const [channel,setChannel]=useState({})
+
+  const fetchChannels=async()=>{
+   try {
+     const url = UrlEndPoint.user(video?.userId)
+    const res =await networkRequest({url})
+     setChannel(res)
+   } catch (error) {
+     console.error(error)
+   }
+  }
+
+ useEffect(()=>{
+fetchChannels()
+  },[video?.userId])
+
   return (
-    <Link to="/video/test" style={{ textDecoration: "none" }}>
+    <Link to={`/video/${video?._id}`} style={{ textDecoration: "none" }}>
     <Container  type={type}>
     <Image
          type={type}
-         src="https://i9.ytimg.com/vi_webp/k3Vfj-e1Ma4/mqdefault.webp?v=6277c159&sqp=CIjm8JUG&rs=AOn4CLDeKmf_vlMC1q9RBEZu-XQApzm6sA"
+         src={video?.imgUrl}
        />
          <Details type={type}>
          <ChannelImage
            type={type}
-           src="img"
-           alt='profile'
+           src={channel?.img}
+           alt=''
          />
          <Texts>
-           <Title>Test Video</Title>
-           <ChannelName>bhb hhk</ChannelName>
-           <Info>660,908 views • 1 day ago</Info>
+           <Title>{video?.title}</Title>
+           <ChannelName>{channel?.name}</ChannelName>
+           <Info>{video?.views} views • {format(video?.createdAt)}</Info>
          </Texts>
        </Details>
    </Container>

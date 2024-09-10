@@ -18,6 +18,8 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import { useSelector } from 'react-redux';
+import { current } from '@reduxjs/toolkit';
 const Container=styled.div`
 flex:1;
 height:100vh;
@@ -80,6 +82,8 @@ const Title = styled.h2`
 
 
 const Menu = ({darkMode,setDarkMode}) => {
+  const {currentUser}=useSelector(state=>state.auth)
+
   return (
     <Container>
       <Wrapper>
@@ -89,18 +93,24 @@ const Menu = ({darkMode,setDarkMode}) => {
             VideoStreamer
           </Logo>
         </Link>
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
       <Item>
         <HomeIcon/>
         Home
       </Item>
+      </Link>
+      <Link to="trends" style={{ textDecoration: "none", color: "inherit" }}>
       <Item>
           <ExploreOutlinedIcon />
           Explore
         </Item>
+        </Link>
+        <Link to="subscriptions" style={{ textDecoration: "none", color: "inherit" }}>
         <Item>
           <SubscriptionsOutlinedIcon />
           Subscriptions
         </Item>
+        </Link>
         <Hr />
         <Item>
           <VideoLibraryOutlinedIcon />
@@ -111,6 +121,7 @@ const Menu = ({darkMode,setDarkMode}) => {
           History
         </Item>
         <Hr />
+        {!currentUser && (<>
         <Login>
           Sign in to like videos, comment, and subscribe.
           <Link to="signin" style={{textDecoration:"none"}}>
@@ -121,6 +132,7 @@ const Menu = ({darkMode,setDarkMode}) => {
           </Link>
         </Login>
         <Hr />
+        </>)}
         <Title>BEST OF VideoStreamer</Title>
         <Item>
           <LibraryMusicOutlinedIcon />

@@ -29,7 +29,9 @@ const Router = () => {
     <Navbar/>
     <Wrapper>
    <Routes>
-     <Route path="/" element={<Home />} />
+     <Route path="/" element={<Home type='random'/>} />
+     <Route path="/trends" element={<Home type='trend' />} />
+     <Route path="/subscriptions" element={<Home  type='sub' />} />
      <Route path="/video/:id" element={<Video />} /> 
      <Route path="/signin" element={<SignIn />} /> 
    </Routes>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
@@ -6,6 +6,10 @@ import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import Comments from '../../components/Comments';
 import Card from '../../components/Card';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import networkRequest from '../../http/api';
+import { UrlEndPoint } from '../../http/apiConfig';
 
 const Container = styled.div`
   display: flex;
@@ -105,6 +109,34 @@ const Subscribe = styled.button`
 `;
 
 const Video = () => {
+  const {currentUser}=useSelector(state=>state.auth)
+  const {currentVideo}=useSelector(state=>state.video)
+  const dispatch = useDispatch();
+  const {id}=useParams()
+  const [data,setData]=useState({
+    video:{},
+    channel:{}
+  })
+  console.log('data: ', data);
+
+const fetchData=async()=>{
+try {
+  const url=UrlEndPoint.video(id)
+  const res = await networkRequest({url})
+  setData({...data,video:res})
+  const urls=UrlEndPoint.user(res?.userId)
+  const channelres= await networkRequest({urls})
+  setData({...data,channel:channelres})
+  console.log('channelres: ', channelres);
+} catch (error) {
+  console.error(error)
+}
+}
+
+useEffect(() => {
+ fetchData()
+}, [id])
+
   return (
     <Container>
       <Content>
@@ -119,9 +151,9 @@ const Video = () => {
             allowfullscreen
           ></iframe>
         </VideoWrapper>
-        <Title>Test Video</Title>
+        <Title>{data?.video?.title}</Title>
         <Details>
-          <Info>7,948,154 views • Jun 22, 2022</Info>
+          <Info>{data?.video?.views} views • {data?.video?.createdAt}</Info>
           <Buttons>
             <Button>
               <ThumbUpOutlinedIcon /> 123
