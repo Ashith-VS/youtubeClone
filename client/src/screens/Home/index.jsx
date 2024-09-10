@@ -26,7 +26,7 @@ const Home = () => {
 <Card/>
 <Card/>
 <Card/>
-    </Container>
+</Container>
   )
 }
 
