@@ -9,4 +9,9 @@ export const UrlEndPoint = {
     signUp:'/api/auth/signup',
     google:'/api/auth/googleAuth',
     video:id=>`/api/video/find/${id}`,
+    like:id=>`/api/user/like/${id}`,
+    dislike:id=>`/api/user/dislike/${id}`,
+    currentUser:'/api/auth/currentUser',
+    subscribe:id=>`/api/user/sub/${id}`,
+    comments:id=>`/api/comment/${id}`
 }

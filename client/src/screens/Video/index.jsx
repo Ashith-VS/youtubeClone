@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components';
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
@@ -10,156 +11,90 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
-
-const Container = styled.div`
-  display: flex;
-  gap: 24px;
-`;
-
-const Content = styled.div`
-  flex: 5;
-`;
-const VideoWrapper = styled.div``;
-
-const Title = styled.h1`
-  font-size: 18px;
-  font-weight: 400;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  color: ${({ theme }) => theme.text};
-`;
-
-const Details = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-const Info = styled.span`
-  color: ${({ theme }) => theme.textSoft};
-`;
-
-const Buttons = styled.div`
-  display: flex;
-  gap: 20px;
-  color: ${({ theme }) => theme.text};
-`;
-
-const Button = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-`;
-
-const Hr = styled.hr`
-  margin: 15px 0px;
-  border: 0.5px solid ${({ theme }) => theme.soft};
-`;
-
-const Recommendation = styled.div`
-  flex: 2;
-`;
-const Channel = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const ChannelInfo = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-
-const Image = styled.img`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-`;
-
-const ChannelDetail = styled.div`
-  display: flex;
-  flex-direction: column;
-  color: ${({ theme }) => theme.text};
-`;
-
-const ChannelName = styled.span`
-  font-weight: 500;
-`;
-
-const ChannelCounter = styled.span`
-  margin-top: 5px;
-  margin-bottom: 20px;
-  color: ${({ theme }) => theme.textSoft};
-  font-size: 12px;
-`;
-
-const Description = styled.p`
-  font-size: 14px;
-`;
-
-const Subscribe = styled.button`
-  background-color: #cc1a00;
-  font-weight: 500;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  height: max-content;
-  padding: 10px 20px;
-  cursor: pointer;
-`;
+import { format } from 'timeago.js';
+import { fetchSuccess } from '../../redux/slice/videoSlice';
+import { currentUserAuth } from '../../redux/slice/commonSlice';
+import {Container,Content,VideoWrapper,Title,Details,Info,Buttons,Button,Hr,Recommendation,Channel,ChannelInfo,Image,ChannelDetail,ChannelName,ChannelCounter,Description,Subscribe,VideoFrame} from "../../assets/css/video"
 
 const Video = () => {
-  const {currentUser}=useSelector(state=>state.auth)
+  const {currentUser}=useSelector(state=>state.common)
   const {currentVideo}=useSelector(state=>state.video)
   const dispatch = useDispatch();
   const {id}=useParams()
-  const [data,setData]=useState({
-    video:{},
-    channel:{}
-  })
-  console.log('data: ', data);
+  const [channel,setChannel]=useState({})
+  
+const fetchData = async () => {
+  try {
+    const videoUrl = UrlEndPoint.video(id);
+    const videoRes = await networkRequest({ url: videoUrl });
+    dispatch(fetchSuccess(videoRes)); // Update video state
 
-const fetchData=async()=>{
+    // Fetch the channel data using userId from video response
+    const userId = videoRes.userId;
+    if (userId) {
+      const userUrl = UrlEndPoint.user(userId);
+      const userRes = await networkRequest({ url: userUrl });
+      setChannel(userRes); 
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+useEffect(() => {
+    fetchData();
+}, [id])
+
+
+const handleLikes = async() => {
 try {
-  const url=UrlEndPoint.video(id)
-  const res = await networkRequest({url})
-  setData({...data,video:res})
-  const urls=UrlEndPoint.user(res?.userId)
-  const channelres= await networkRequest({urls})
-  setData({...data,channel:channelres})
-  console.log('channelres: ', channelres);
+  const url = UrlEndPoint.like(currentVideo?._id)
+  await networkRequest({url,method:'put'})
+  fetchData()
 } catch (error) {
   console.error(error)
 }
 }
 
-useEffect(() => {
- fetchData()
-}, [id])
+const handleDislikes = async() => {
+try {
+  const url = UrlEndPoint.dislike(currentVideo?._id)
+ await networkRequest({url,method:'put'})
+fetchData()
+} catch (error) {
+  console.error(error)
+}
+}
+
+
+const handleSubscribe = async() => {
+  try {
+  if(channel?._id){
+  const url=UrlEndPoint.subscribe(channel?._id)
+ const res = await networkRequest({url,method:'put'})
+ dispatch(currentUserAuth(res?.updatedUser))
+  fetchData()
+  }
+  } catch (error) {
+    console.error(error)
+  }
+}
 
   return (
     <Container>
       <Content>
         <VideoWrapper>
-        <iframe
-            width="100%"
-            height="720"
-            src="https://www.youtube.com/embed/VUiKaAVZ2lc?si=ge7dPJuQWAgcxUhz"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          ></iframe>
+       <VideoFrame>{currentVideo?.videoUrl}</VideoFrame>
         </VideoWrapper>
-        <Title>{data?.video?.title}</Title>
+        <Title>{currentVideo?.title}</Title>
         <Details>
-          <Info>{data?.video?.views} views • {data?.video?.createdAt}</Info>
+          <Info>{currentVideo?.views} views • {format(currentVideo?.createdAt)}</Info>
           <Buttons>
-            <Button>
-              <ThumbUpOutlinedIcon /> 123
+            <Button onClick={handleLikes}>
+           {currentVideo?.likes?.includes(currentUser?._id)? (<ThumbUpIcon />):(<ThumbUpOutlinedIcon />)}{currentVideo?.likes?.length}
             </Button>
-            <Button>
-              <ThumbDownOffAltOutlinedIcon /> Dislike
+            <Button onClick={handleDislikes}>
+              {currentVideo.dislikes?.includes(currentUser?._id) ? (<ThumbDownIcon />):(<ThumbDownOffAltOutlinedIcon />)} Dislike
             </Button>
             <Button>
               <ReplyOutlinedIcon /> Share
@@ -172,22 +107,19 @@ useEffect(() => {
         <Hr />
         <Channel>
           <ChannelInfo>
-            <Image src="https://yt3.ggpht.com/yi/APfAmoE-Q0ZLJ4vk3vqmV4Kwp0sbrjxLyB8Q4ZgNsiRH=s88-c-k-c0x00ffff-no-rj-mo" />
+            <Image src={channel?.avatar} />
             <ChannelDetail>
-              <ChannelName>njkhjh</ChannelName>
-              <ChannelCounter>200K subscribers</ChannelCounter>
+              <ChannelName>{channel?.name}</ChannelName>
+              <ChannelCounter>{channel?.subscribers} subscribers</ChannelCounter>
               <Description>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Doloribus laborum delectus unde quaerat dolore culpa sit aliquam
-                at. Vitae facere ipsum totam ratione exercitationem. Suscipit
-                animi accusantium dolores ipsam ut.
+                {currentVideo?.description}
               </Description>
             </ChannelDetail>
           </ChannelInfo>
-          <Subscribe>SUBSCRIBE</Subscribe>
+          <Subscribe onClick={handleSubscribe}>{currentUser?.subscribedChannels?.includes(channel?._id)?"SUBSCRIBED":"SUBSCRIBE"}</Subscribe>
         </Channel>
         <Hr />
-        <Comments/>
+        <Comments videoId={currentVideo?._id}/>
         </Content>
         <Recommendation>
           <Card type="sm" />

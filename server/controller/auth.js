@@ -35,11 +35,8 @@ export const isSignIn = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
         const isMatch = await bcrypt.compare(req.body.password, user.password);
         if (!isMatch) return res.status(400).json({ success: false, message: "Invalid password" });
-        // const token =jwt.sign({id:user._id},process.env.JWT_SECRET,{expiresIn:'2h'})
-        // res.json({ success: true, message: "User logged in successfully",token });
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-        const { password, ...others } = user._doc
-        res.cookie('access_token', token, { httpOnly: true }).status(200).json(others)
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
+        res.json({ success: true, message: "User logged in successfully", token });
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
     }
@@ -48,22 +45,33 @@ export const isSignIn = async (req, res) => {
 
 export const isGoogleAuth = async (req, res) => {
     try {
-        const user= await User.findOne({email: req.body.email})
-        if(user) {
+        const user = await User.findOne({ email: req.body.email })
+        if (user) {
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
             res.cookie('access_token', token, { httpOnly: true }).status(200).json(user._doc)
-        }else{
+        } else {
             const newUser = new User({
                 name: req.body.name,
                 email: req.body.email,
                 avatar: req.body.img,
-                fromGoogle:true
+                fromGoogle: true
             })
             await newUser.save()
-            const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET)
-            res.cookie('access_token', token, { httpOnly: true }).status(200).json(newUser._doc)
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
+            res.json({ success: true, message: "User logged in successfully", token });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
+    }
+}
+
+export const isCurrentUser = async (req, res) => {
+    try {
+        const userId = req.id //from header token
+        const user = await User.findById(userId).select('-password')
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.status(200).json({ status: 200, user })
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving user data' });
     }
 }

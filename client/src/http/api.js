@@ -16,13 +16,13 @@ activeRequests++;
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Accept-Language": "en",
-            // Authorization: localStorage.getItem('auth_token') ? `Bearer ${localStorage.getItem('auth_token')}` : null,
+            Authorization: localStorage.getItem('auth_token') ? `Bearer ${localStorage.getItem('auth_token')}` : null,
             ...headers,
         },
         data,
     };
 
-    console.log("config:", config);
+    // console.log("config:", config);
 
 return new Promise(async(resolve, reject) => {
     try {
@@ -34,7 +34,7 @@ return new Promise(async(resolve, reject) => {
             errorMessage = error.response.data.message || errorMessage;
             if (error.response.status === 401 || error.response.status === 403) {
                 // Handle unauthorized access (e.g., logout user)
-                // logout();
+                logout();
             }
         } else if (error.request) {
             errorMessage = 'No response received from server';

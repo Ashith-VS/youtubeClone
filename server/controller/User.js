@@ -40,36 +40,40 @@ export const isgetUser = async (req, res) => {
     }
 }
 
-export const isSubscribeUser = async (req, res) => {
-    try {
-        await User.findByIdAndUpdate(req.user.id, {
-            $push: { subscribedChannels: req.params.id, }
-        })
-        await User.findByIdAndUpdate(req.params.id, {
-            $inc: { subscribers: 1 }
-        })
-        res.status(200).json({ message: 'Subscribed successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
 
-export const isUnSubscribeUser = async (req, res) => {
+export const toggleSubscription = async (req, res) => {
+    const userId = req.id;
+    const channelId = req.params.id;
     try {
-        await User.findByIdAndUpdate(req.user.id, {
-            $pull: { subscribedChannels: req.params.id, }
-        })
-        await User.findByIdAndUpdate(req.params.id, {
-            $inc: { subscribers: -1 }
-        })
-        res.status(200).json({ message: 'UnSubscribed successfully' });
+      const user=await User.findById(userId)
+     const isSubscribed = user.subscribedChannels.includes(channelId)
+     if(!isSubscribed ){
+        await User.findByIdAndUpdate(userId, {
+            $addToSet: { subscribedChannels: channelId }, // $addToSet prevents duplicates
+        });
+        await User.findByIdAndUpdate(channelId, {
+            $inc: { subscribers: 1 },
+        });
+        const updatedUser = await User.findById(userId)
+        res.status(200).json({ message: 'Subscribed successfully',updatedUser });
+     }else{
+        await User.findByIdAndUpdate(userId, {
+            $pull: { subscribedChannels: channelId },
+        });
+        await User.findByIdAndUpdate(channelId, {
+            $inc: { subscribers: -1 },
+        });
+        const updatedUser = await User.findById(userId)
+        res.status(200).json({ message: 'Unsubscribed successfully',updatedUser });
+     }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-}
+  };
+  
 
 export const isLikeUser = async (req, res) => {
-    const id = req.user.id; //from verifytoken
+    const id = req.id; //from verifytoken
     const videoId = req.params.vidid
     try {
         await Video.findByIdAndUpdate(videoId, {
@@ -82,7 +86,7 @@ export const isLikeUser = async (req, res) => {
     }
 }
 export const isDislikeUser = async (req, res) => {
-    const id = req.user.id; //from verifytoken
+    const id = req.id; //from verifytoken
     const videoId = req.params.vidid
     try {
         await Video.findByIdAndUpdate(videoId, {

@@ -8,12 +8,12 @@ export const videoSlice = createSlice({
     name: 'video',
     initialState,
     reducers: {
-        setVideo: (state, action) => {
+        fetchSuccess: (state, action) => {
             state.currentVideo = action.payload;
         },
     }
 })
 
-export const { setVideo} = videoSlice.actions
+export const { fetchSuccess} = videoSlice.actions
 
 export default videoSlice.reducer

@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components';
 import Card from '../../components/Card';
 import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
-const Container = styled.div`
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-`;
+import {Container} from "../../assets/css/home"
+
 const Home = ({type}) => {
   const [videos,setVideos]=useState([])
 
@@ -27,7 +23,7 @@ fetchVideos()
 
   return (
     <Container>
-      {videos.map((video)=>(
+      {videos?.map((video)=>(
        <Card key={video?._id} video={video}/>
       ))}
 </Container>

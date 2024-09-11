@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
     currentUser: null,
-    isLoading: false,
     error: null
 }
 
@@ -22,9 +21,6 @@ export const userSlice = createSlice({
             state.currentUser = null;
             state.error = null;
             state.isLoading = false;
-        },
-        showLoader: (state, action) => {
-            state.isLoading = action.payload
         }
     }
 })

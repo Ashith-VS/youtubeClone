@@ -1,45 +1,40 @@
-import React from 'react'
-import styled from "styled-components";
+import React, { useEffect, useState } from 'react'
 import Comment from './Comment';
+import { UrlEndPoint } from '../http/apiConfig';
+import networkRequest from '../http/api';
+import { useSelector } from 'react-redux';
+import { Container,
+  NewComment,
+  Avatar,
+  Input}from "../assets/css/comments"
 
-const Container = styled.div``;
+const Comments = ({videoId}) => {
+  const {currentUser} = useSelector(state=>state.common)
+  const [comments, setComments] = useState([]);
 
-const NewComment = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const url=UrlEndPoint.comments(videoId)
+        const res = await networkRequest({url});
+        setComments(res);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchComments();
+  }, [videoId]);
 
-const Avatar = styled.img`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-`;
-
-const Input = styled.input`
-  border: none;
-  border-bottom: 1px solid ${({ theme }) => theme.soft};
-  color: ${({ theme }) => theme.text};
-  background-color: transparent;
-  outline: none;
-  padding: 5px;
-  width: 100%;
-`;
-
-const Comments = () => {
   return (
    <Container>
      <NewComment>
-        <Avatar src="https://yt3.ggpht.com/yi/APfAmoE-Q0ZLJ4vk3vqmV4Kwp0sbrjxLyB8Q4ZgNsiRH=s88-c-k-c0x00ffffff-no-rj-mo" />
+        <Avatar src={currentUser?.avatar} />
         <Input placeholder="Add a comment..." />
       </NewComment>
-      <Comment/>
-      <Comment/>
-      <Comment/>
-      <Comment/>
-      <Comment/>
-      <Comment/>
-      <Comment/>
+      {comments.map((comment) => {
+        return <Comment key={comment?._id} comment={comment} />
+      }
+      )}
    </Container>
   )
 }

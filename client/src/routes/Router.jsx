@@ -18,28 +18,28 @@ padding: 22px 96px;
 `;
 
 const Router = () => {
-    const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   return (
     <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-    <Container>
-    <BrowserRouter>
-    <Menu darkMode={darkMode} setDarkMode={setDarkMode}/>
-    <Main>
-    <Navbar/>
-    <Wrapper>
-   <Routes>
-     <Route path="/" element={<Home type='random'/>} />
-     <Route path="/trends" element={<Home type='trend' />} />
-     <Route path="/subscriptions" element={<Home  type='sub' />} />
-     <Route path="/video/:id" element={<Video />} /> 
-     <Route path="/signin" element={<SignIn />} /> 
-   </Routes>
-   </Wrapper>
-   </Main>
-   </BrowserRouter>
-   </Container>
-   </ThemeProvider>
+      <Container>
+        <BrowserRouter>
+          <Menu darkMode={darkMode} setDarkMode={setDarkMode} />
+          <Main>
+            <Navbar />
+            <Wrapper>
+              <Routes>
+                <Route path="/" element={<Home type='random' />} />
+                <Route path="/trends" element={<Home type='trend' />} />
+                <Route path="/subscriptions" element={<Home type='sub' />} />
+                <Route path="/video/:id" element={<Video />} />
+                <Route path="/signin" element={<SignIn />} />
+              </Routes>
+            </Wrapper>
+          </Main>
+        </BrowserRouter>
+      </Container>
+    </ThemeProvider>
   )
 }
 
