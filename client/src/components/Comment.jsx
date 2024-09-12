@@ -8,6 +8,8 @@ import {Container,
   Name,
   Date,
   Text}from "../assets/css/comment"
+  import DeleteIcon from '@mui/icons-material/Delete';
+
 const Comment = ({comment}) => {
 const [CommentedUser,setCommentedUser]=useState({})
 
@@ -24,6 +26,8 @@ useEffect(() => {
   fetchCommentedUser()
 }, [])
 
+
+
   return (
     <Container>
     <Avatar src={CommentedUser?.avatar} />
@@ -31,7 +35,8 @@ useEffect(() => {
       <Name>
         {CommentedUser?.name} <Date>{format(comment?.createdAt)}</Date>
       </Name>
-      <Text>{comment?.desc}</Text>
+      <Text>{comment?.desc} </Text>
+      {/* <DeleteIcon onClick={handleDeleteComment} /> */}
     </Details>
   </Container>
   )

@@ -4,12 +4,12 @@ import { addVideo, addView, deleteVideo, getBySearch, getByTags, getVideo, rando
 
 const router = express.Router();
 
+router.get('/find/:id', getVideo)
 router.get('/random', randomVideo)
 router.get('/trend', trendVideo)
-router.get('/find/:id', getVideo)
-router.get('/sub',verifyToken, subscribedVideo)
-router.get('/tags',getByTags )
-router.get('/search',getBySearch)
+router.get('/tags', getByTags)
+router.get('/search', getBySearch)
+router.get('/sub', verifyToken, subscribedVideo)
 router.post('/', verifyToken, addVideo)
 router.put('/:id', verifyToken, updateVideo)
 router.delete('/:id', verifyToken, deleteVideo)

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Home, SignIn, Video } from '../screens';
+import { Home, Search, SignIn, Video } from '../screens';
 import styled, { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from '../utils/Theme';
 import Navbar from '../components/Navbar';
@@ -34,6 +34,7 @@ const Router = () => {
                 <Route path="/subscriptions" element={<Home type='sub' />} />
                 <Route path="/video/:id" element={<Video />} />
                 <Route path="/signin" element={<SignIn />} />
+                <Route path="/search" element={<Search />} />
               </Routes>
             </Wrapper>
           </Main>

@@ -12,12 +12,15 @@ export const commonSlice = createSlice({
         currentUserAuth: (state, action) => {
             state.currentUser = action.payload;
         },
+        logout: (state) => {
+      state.currentUser = null; // Clear the user data
+    },
         showLoader: (state, action) => {
             state.isLoading = action.payload
         }
     }
 })
 
-export const { currentUserAuth,showLoader } = commonSlice.actions
+export const { currentUserAuth,logout,showLoader } = commonSlice.actions
 
 export default commonSlice.reducer

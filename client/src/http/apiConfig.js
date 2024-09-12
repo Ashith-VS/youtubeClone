@@ -13,5 +13,12 @@ export const UrlEndPoint = {
     dislike:id=>`/api/user/dislike/${id}`,
     currentUser:'/api/auth/currentUser',
     subscribe:id=>`/api/user/sub/${id}`,
-    comments:id=>`/api/comment/${id}`
+    addComment:'/api/comment',
+    comments:id=>`/api/comment/${id}`,
+    addVideo:'/api/video',
+    recommendation:tags=>`/api/video/tags?tags=${tags}`,
+    search:query=>`/api/video/search${query}`,
 }
+// updateVideo:'/api/video',
+// deleteVideo:'/api/video',
+// addView:'/api/video/view'

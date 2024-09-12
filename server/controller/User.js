@@ -13,7 +13,7 @@ export const isUpdateUser = async (req, res) => {
             res.status(500).json({ message: error.message });
         }
     } else {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(400).json({ message: 'Unauthorized' });
     }
 }
 
@@ -27,7 +27,7 @@ export const isdeleteUser = async (req, res) => {
             res.status(500).json({ message: error.message });
         }
     } else {
-        res.status(401).json({ message: 'Unauthorized' });
+        res.status(400).json({ message: 'Unauthorized' });
     }
 }
 

@@ -25,7 +25,10 @@ const SignIn = () => {
     const url = isSignUp ? UrlEndPoint.signUp : UrlEndPoint.signIn; // Dynamically choose the endpoint
     try {
       const res = await networkRequest({url,method: 'post',data: formData});
-      if(res?.token) return localStorage.setItem('auth_token', res.token);
+      if(res?.token){
+       localStorage.setItem('auth_token', res.token);
+
+}
       // dispatch(loginSuccess(res))
       setFormData({
         name: '',

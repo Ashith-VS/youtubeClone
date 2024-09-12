@@ -4,7 +4,7 @@ import Video from "../model/Video.js"
 export const addComment=async(req,res)=>{
     // req.user.id from verifytoken
     try {
-        const newComment =new Comment({...req.body,userId:req.user.id})
+        const newComment =new Comment({...req.body,userId:req.id})
         await newComment.save()
         res.status(201).json(newComment)
     } catch (error) {
@@ -20,7 +20,7 @@ export const deleteComment=async(req,res)=>{
             await Comment.findByIdAndDelete(req.params.id)
             res.status(200).json({message: 'Comment deleted'})
         }else{
-            res.status(403).json({message: 'Unauthorized'})
+            res.status(400).json({message: 'Unauthorized'})
         }
     } catch (error) {
         res.status(500).json({message: error.message})

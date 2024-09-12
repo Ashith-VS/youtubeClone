@@ -6,7 +6,6 @@ import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutl
 import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import Comments from '../../components/Comments';
-import Card from '../../components/Card';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import networkRequest from '../../http/api';
@@ -14,7 +13,8 @@ import { UrlEndPoint } from '../../http/apiConfig';
 import { format } from 'timeago.js';
 import { fetchSuccess } from '../../redux/slice/videoSlice';
 import { currentUserAuth } from '../../redux/slice/commonSlice';
-import {Container,Content,VideoWrapper,Title,Details,Info,Buttons,Button,Hr,Recommendation,Channel,ChannelInfo,Image,ChannelDetail,ChannelName,ChannelCounter,Description,Subscribe,VideoFrame} from "../../assets/css/video"
+import {Container,Content,VideoWrapper,Title,Details,Info,Buttons,Button,Hr,Channel,ChannelInfo,Image,ChannelDetail,ChannelName,ChannelCounter,Description,Subscribe,VideoFrame} from "../../assets/css/video"
+import Recommendation from '../../components/Recommendation';
 
 const Video = () => {
   const {currentUser}=useSelector(state=>state.common)
@@ -84,7 +84,7 @@ const handleSubscribe = async() => {
     <Container>
       <Content>
         <VideoWrapper>
-       <VideoFrame>{currentVideo?.videoUrl}</VideoFrame>
+       <VideoFrame src={currentVideo?.videoUrl} controls />
         </VideoWrapper>
         <Title>{currentVideo?.title}</Title>
         <Details>
@@ -121,14 +121,7 @@ const handleSubscribe = async() => {
         <Hr />
         <Comments videoId={currentVideo?._id}/>
         </Content>
-        <Recommendation>
-          <Card type="sm" />
-          <Card type="sm" />
-          <Card type="sm" />
-          <Card type="sm" />
-          <Card type="sm" />
-          <Card type="sm" />
-        </Recommendation>
+        <Recommendation tags={currentVideo?.tags}/>
         </Container>
   )
 }

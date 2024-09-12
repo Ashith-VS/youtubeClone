@@ -3,9 +3,9 @@ import Video from "../model/Video.js"
 
 export const addVideo = async (req, res) => {
     try {
-        const newVideo = new Video({ userId: req.user.id, ...req.body })
+        const newVideo = new Video({ userId: req.id, ...req.body })
         await newVideo.save()
-        res.status(201).json(newVideo)
+        res.status(200).json(newVideo)
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
@@ -20,7 +20,7 @@ export const updateVideo = async (req, res) => {
             }, { new: true })
             res.status(200).json(updatedVideo)
         } else {
-            res.status(403).json({ message: 'Unauthorized' })
+            res.status(400).json({ message: 'Unauthorized' })
         }
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -34,7 +34,7 @@ export const deleteVideo = async (req, res) => {
             await Video.findByIdAndDelete(req.params.id)
             res.status(200).json({ success: true, message: "video successfully deleted" })
         } else {
-            res.status(403).json({ message: 'Unauthorized' })
+            res.status(400).json({ message: 'Unauthorized' })
         }
     } catch (error) {
         res.status(500).json({ message: error.message })
