@@ -46,20 +46,14 @@ const Button = styled.button`
   background-color: ${({ theme }) => theme.soft};
   color: ${({ theme }) => theme.textSoft};
 `;
-
-const More = styled.div`
-  display: flex;
-  margin-top: 10px;
+const ErrorMessage = styled.p`
+  color: red;
   font-size: 12px;
-  color: ${({ theme }) => theme.textSoft};
+  margin: 5px 0;
+  padding: 5px 10px;
+  background-color: #ffdada;
+  border-radius: 5px;
+  width: 100%;
 `;
 
-const Links = styled.div`
-  margin-left: 50px;
-`;
-
-const Link = styled.span`
-  margin-left: 30px;
-`;
-
-export { Container, Wrapper, Title, SubTitle, Input, Button, More, Links, Link };
+export { Container, Wrapper, Title, SubTitle, Input, Button,ErrorMessage};

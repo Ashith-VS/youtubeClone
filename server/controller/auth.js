@@ -31,10 +31,10 @@ export const isSignUp = async (req, res) => {
 export const isSignIn = async (req, res) => {
     try {
         // const { name, password } = req.body
-        const user = await User.findOne({ name: req.body.name });
+        const user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid password" });
+        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid email/password" });
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
         res.json({ success: true, message: "User logged in successfully", token });
     } catch (error) {
@@ -47,8 +47,8 @@ export const isGoogleAuth = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email })
         if (user) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-            res.cookie('access_token', token, { httpOnly: true }).status(200).json(user._doc)
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
+            res.json({ success: true, message: "User logged in successfully", token });
         } else {
             const newUser = new User({
                 name: req.body.name,

@@ -10,6 +10,8 @@ import {
   Avatar,
   Input
 } from "../assets/css/comments"
+import { isEmpty } from 'lodash';
+import { toast } from 'react-toastify';
 
 const Comments = ({ videoId }) => {
   const [desc, setDesc] = useState('');
@@ -31,14 +33,19 @@ const Comments = ({ videoId }) => {
   }, [videoId]);
 
   const handleAddComment = async () => {
-    const data = { videoId, desc }
-    const url = UrlEndPoint.addComment
-    try {
-      await networkRequest({ url, method: 'post', data });
-      setDesc('')
-      fetchComments()
-    } catch (error) {
-      console.error(error);
+    if(!isEmpty(currentUser)){
+      const data = { videoId, desc }
+      const url = UrlEndPoint.addComment
+      try {
+        await networkRequest({ url, method: 'post', data });
+        setDesc('')
+        fetchComments()
+      } catch (error) {
+        console.error(error);
+      }
+    }else{
+      toast.error('Please sign in to add a comment.')
+      return;
     }
   }
 

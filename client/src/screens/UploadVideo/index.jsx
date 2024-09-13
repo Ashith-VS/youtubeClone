@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { Container, Wrapper, Close, Title, Input, Desc, Button, Label, ErrorMessage } from "../assets/css/popup"
-import { storage } from '../firebase';
+import { useNavigate } from 'react-router-dom';
+import { isEmpty } from 'lodash';
+import { UrlEndPoint } from '../../http/apiConfig';
+import networkRequest from '../../http/api';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { v4 as uuid } from "uuid"
-import networkRequest from '../http/api';
-import { UrlEndPoint } from '../http/apiConfig';
-import { useNavigate } from 'react-router-dom';
-import { isEmpty } from 'lodash'
+import { storage } from '../../services/firebase';
+import { Container, Wrapper, Title, Input, Desc, Button, Label, ErrorMessage } from "../../assets/css/upload"
 
-const Popup = ({ setOpen }) => {
+const UploadVideo = () => {
     const navigate = useNavigate()
     const [error, setError] = useState({});
     const [formData, setFormData] = useState({
@@ -47,7 +47,6 @@ const Popup = ({ setOpen }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const valid = handleValidation();
-        console.log('valid: ', valid);
         if (!isEmpty(valid)) {
             setError(valid)
         } else {
@@ -55,8 +54,8 @@ const Popup = ({ setOpen }) => {
                 const url = UrlEndPoint.addVideo;
                 const res = await networkRequest({ url, method: 'post', data: formData });
                 if (res) {
-                    setOpen(false);
-                    navigate(`video/${res._id}`);
+                    console.log('res: ', res);
+                    navigate(`/video/${res._id}`);
                 }
             } catch (error) {
                 console.error('Error during upload or API call:', error);
@@ -93,12 +92,10 @@ const Popup = ({ setOpen }) => {
             }
         )
     }
-
     return (
         <Container>
             <Wrapper>
-                <Close onClick={() => setOpen(false)}>x</Close>
-                <Title>Upload a New Video</Title>
+                <Title>Upload  a New Video</Title>
                 <Label>Video:</Label>
                 {percentage.videoPercentage > 0 ? ("Uploading:" + percentage?.videoPercentage + '%') : (<>
                     <Input type="file" accept='video/*' id="file" onChange={(e) => {
@@ -136,4 +133,4 @@ const Popup = ({ setOpen }) => {
     )
 }
 
-export default Popup
+export default UploadVideo

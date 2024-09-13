@@ -1,12 +1,21 @@
 import Comment from "../model/Comment.js"
 import Video from "../model/Video.js"
 
+
 export const addComment=async(req,res)=>{
-    // req.user.id from verifytoken
     try {
         const newComment =new Comment({...req.body,userId:req.id})
         await newComment.save()
         res.status(201).json(newComment)
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+export const getAllComments=async(req,res)=>{
+    try {
+        const comments = await Comment.find({videoId:req.params.videoId})
+        res.status(200).json(comments)
     } catch (error) {
         res.status(500).json({message: error.message})
     }
@@ -27,11 +36,3 @@ export const deleteComment=async(req,res)=>{
     }
 }
 
-export const getAllComments=async(req,res)=>{
-    try {
-        const comments = await Comment.find({videoId:req.params.videoId})
-        res.status(200).json(comments)
-    } catch (error) {
-        res.status(500).json({message: error.message})
-    }
-}

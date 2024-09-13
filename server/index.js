@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv'
 import router from './routes/index.js';
+import "./mediaServer.js"
 
 const app = express();
 dotenv.config()

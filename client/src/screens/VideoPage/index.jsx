@@ -15,6 +15,8 @@ import { fetchSuccess } from '../../redux/slice/videoSlice';
 import { currentUserAuth } from '../../redux/slice/commonSlice';
 import {Container,Content,VideoWrapper,Title,Details,Info,Buttons,Button,Hr,Channel,ChannelInfo,Image,ChannelDetail,ChannelName,ChannelCounter,Description,Subscribe,VideoFrame} from "../../assets/css/video"
 import Recommendation from '../../components/Recommendation';
+import { toast } from 'react-toastify';
+import { isEmpty } from 'lodash';
 
 const Video = () => {
   const {currentUser}=useSelector(state=>state.common)
@@ -47,36 +49,48 @@ useEffect(() => {
 
 
 const handleLikes = async() => {
-try {
-  const url = UrlEndPoint.like(currentVideo?._id)
-  await networkRequest({url,method:'put'})
-  fetchData()
-} catch (error) {
-  console.error(error)
-}
+  if(!isEmpty(currentUser)){
+    try {
+      const url = UrlEndPoint.like(currentVideo?._id)
+      await networkRequest({url,method:'put'})
+      fetchData()
+    } catch (error) {
+      console.error(error)
+    }
+  }else{
+    toast.error('Please login to like or dislike videos.')
+  }
 }
 
 const handleDislikes = async() => {
-try {
-  const url = UrlEndPoint.dislike(currentVideo?._id)
- await networkRequest({url,method:'put'})
-fetchData()
-} catch (error) {
-  console.error(error)
-}
+  if(!isEmpty(currentUser)){
+    try {
+      const url = UrlEndPoint.dislike(currentVideo?._id)
+     await networkRequest({url,method:'put'})
+    fetchData()
+    } catch (error) {
+      console.error(error)
+    }
+  }else{
+    toast.error('Please login to like or dislike videos.')
+  }
 }
 
 
 const handleSubscribe = async() => {
-  try {
-  if(channel?._id){
-  const url=UrlEndPoint.subscribe(channel?._id)
- const res = await networkRequest({url,method:'put'})
- dispatch(currentUserAuth(res?.updatedUser))
-  fetchData()
-  }
-  } catch (error) {
-    console.error(error)
+  if(!isEmpty(currentUser)){
+    try {
+    if(channel?._id){
+    const url=UrlEndPoint.subscribe(channel?._id)
+   const res = await networkRequest({url,method:'put'})
+   dispatch(currentUserAuth(res?.updatedUser))
+    fetchData()
+    }
+    } catch (error) {
+      console.error(error)
+    }
+  }else{
+    toast.error('Please login to subscribe to channels.')
   }
 }
 

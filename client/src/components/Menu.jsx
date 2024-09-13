@@ -19,26 +19,17 @@ import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Container,
-  Wrapper,
-  Logo,
-  Img,
-  Item,
-  Hr,
-  Login,
-  Button,
-  Title
-} from "../assets/css/menu"
+import {Container,Wrapper,Logo,Img,Item,Hr,Login,Button,Title} from "../assets/css/menu"
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { logout } from '../redux/slice/commonSlice';
+import { isEmpty } from 'lodash';
 
 const Menu = ({ darkMode, setDarkMode }) => {
   const { currentUser } = useSelector(state => state.common)
-  const navigate=useNavigate()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const handleLogout=()=>{
+  const handleLogout = () => {
     localStorage.removeItem('auth_token');
     localStorage.clear()
     dispatch(logout());
@@ -66,12 +57,13 @@ const Menu = ({ darkMode, setDarkMode }) => {
             Explore
           </Item>
         </Link>
+        {!isEmpty(currentUser)&&
         <Link to="subscriptions" style={{ textDecoration: "none", color: "inherit" }}>
           <Item>
             <SubscriptionsOutlinedIcon />
             Subscriptions
           </Item>
-        </Link>
+        </Link>}
         <Hr />
         <Item>
           <VideoLibraryOutlinedIcon />
@@ -81,8 +73,6 @@ const Menu = ({ darkMode, setDarkMode }) => {
           <HistoryOutlinedIcon />
           History
         </Item>
-
-        
         <Hr />
         <Title>BEST OF VideoStreamer</Title>
         <Item>
@@ -105,12 +95,24 @@ const Menu = ({ darkMode, setDarkMode }) => {
           <ArticleOutlinedIcon />
           News
         </Item>
-        <Item>
+
+        {!isEmpty(currentUser)&&<Item onClick={() => { navigate('/live') }}>
           <LiveTvOutlinedIcon />
           Live
-        </Item>
+        </Item>}
         <Hr />
-        {!currentUser ? (<>
+        {!isEmpty(currentUser) ? (
+          <>
+            <Item onClick={()=>navigate('/profile')}>
+              <AccountCircleIcon />
+              Profile
+            </Item>
+            <Button onClick={handleLogout}>
+              <LogoutIcon />
+              Sign Out
+            </Button>
+          </>
+        ) : (
           <Login>
             Sign in to like videos, comment, and subscribe.
             <Link to="signin" style={{ textDecoration: "none" }}>
@@ -120,20 +122,8 @@ const Menu = ({ darkMode, setDarkMode }) => {
               </Button>
             </Link>
           </Login>
-        </>) : (
-          <>
-           <Item>
-          <AccountCircleIcon />
-         Profile
-        </Item>
-            <Button onClick={handleLogout}>
-              <LogoutIcon />
-              Sign Out
-            </Button>
-          </>
         )}
         <Hr />
-       
         <Item>
           <SettingsOutlinedIcon />
           Settings

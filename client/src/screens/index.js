@@ -1,11 +1,19 @@
 import Home from "./Home"
-import Video from "./Video"
-import SignIn from "./SignIn"
+import Video from "./VideoPage"
 import Search from "./Search"
+import UploadVideo from "./UploadVideo"
+import LiveStreamming from "./LIveStreamming"
+import SignIn from "./Auth/SignIn"
+import SignUp from "./Auth/SignUp"
+import Profile from "./Profile"
 
 export {
     Home,
     Video,
+    Search,
+    UploadVideo,
+    LiveStreamming,
     SignIn,
-    Search
+    SignUp,
+    Profile
 }
