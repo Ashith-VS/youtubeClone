@@ -94,18 +94,19 @@ const handleSubscribe = async() => {
   }
 }
 
+
   return (
     <Container>
       <Content>
         <VideoWrapper>
-       <VideoFrame src={currentVideo?.videoUrl} controls />
+      <VideoFrame src={currentVideo?.videoUrl} controls />
         </VideoWrapper>
         <Title>{currentVideo?.title}</Title>
         <Details>
           <Info>{currentVideo?.views} views • {format(currentVideo?.createdAt)}</Info>
           <Buttons>
             <Button onClick={handleLikes}>
-           {currentVideo?.likes?.includes(currentUser?._id)? (<ThumbUpIcon />):(<ThumbUpOutlinedIcon />)}{currentVideo?.likes?.length}
+          {currentVideo?.likes?.includes(currentUser?._id)? (<ThumbUpIcon />):(<ThumbUpOutlinedIcon />)}{currentVideo?.likes?.length}
             </Button>
             <Button onClick={handleDislikes}>
               {currentVideo.dislikes?.includes(currentUser?._id) ? (<ThumbDownIcon />):(<ThumbDownOffAltOutlinedIcon />)} Dislike

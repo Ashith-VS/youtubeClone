@@ -1,0 +1,266 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { ChatHeader, ChatInput, ChatInputContainer, ChatMessages, ChatSection, Container, PlayPauseButton, SendButton, VideoPlayer, VideoSection } from '../../assets/css/live'
+import { useSelector } from 'react-redux';
+import { socket } from '../../common/common';
+
+// const GetStreaming = () => {
+//   const { currentUser } = useSelector(state => state.common)
+//   const remoteVideoRef = useRef(null);
+//   const peerConnection = useRef(null);
+//   const [messages, setMessages] = useState([]);
+//   const [message, setMessage] = useState('');
+//   const config = {
+//     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' },
+//     { urls: 'stun:stun2.l.google.com:19302' },]
+//   };
+
+//   const createPeerConnection = () => {
+//     peerConnection.current = new RTCPeerConnection(config);
+
+//     // Receive the remote stream and attach it to the video element
+//     peerConnection.current.ontrack = (event) => {
+//       console.log('Received remote stream:', event.streams);
+//       remoteVideoRef.current.srcObject = event.streams[0];
+//     };
+
+//     // Send ICE candidates to the broadcaster
+//     peerConnection.current.onicecandidate = (event) => {
+//       if (event.candidate) {
+//         socket.emit('ice-candidate', event.candidate);
+//       }
+//     };
+//   };
+
+//   useEffect(() => {
+//     socket.on('chat-message', (msg) => {
+//       setMessages((prevMessages) => [...prevMessages, msg]);
+//     });
+//     // Listen for an offer from the broadcaster
+//     socket.on('offer', async (offer) => {
+//       console.log('Received offer:', offer);
+//       createPeerConnection();
+//       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+//       // Create an answer and send it back to the broadcaster
+//       const answer = await peerConnection.current.createAnswer();
+//       await peerConnection.current.setLocalDescription(answer);
+//       socket.emit('answer', answer);
+//     });
+//     // Listen for ICE candidates from the broadcaster
+//     // socket.on('ice-candidate', (candidate) => {
+//     //   peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+//     // });
+//     socket.on('ice-candidate', (candidate) => {
+//       if (peerConnection.current) {
+//         console.log('Received ICE candidate:', candidate);
+//         peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate))
+//           .catch(e => console.error('Error adding received ICE candidate', e));
+//       } else {
+//         console.warn('Peer connection is null, cannot add ICE candidate');
+//       }
+//     });
+
+//     return () => {
+//       socket.off('chat-message');
+//       socket.off('offer');
+//       socket.off('ice-candidate');
+//     };
+//   }, []);
+//   useEffect(() => {
+//     const videoElement = remoteVideoRef.current;
+  
+//     if (videoElement) {
+//       videoElement.addEventListener('loadedmetadata', () => {
+//         videoElement.play().catch(error => {
+//           console.error('Autoplay error:', error);
+//         });
+//       });
+//     }
+  
+//     return () => {
+//       if (videoElement) {
+//         videoElement.removeEventListener('loadedmetadata', () => {});
+//       }
+//     };
+//   }, []);
+
+
+//   const sendMessage = (e) => {
+//     e.preventDefault();
+//     if (message.trim()) {
+//       const messageData = {
+//         username: currentUser?.name,
+//         message: message
+//       };
+//       socket.emit('chat-message', messageData);
+//       setMessage('');
+//     }
+//   };
+//   return (
+//     <Container>
+//       <VideoSection>
+//         <VideoPlayer>
+//           <video ref={remoteVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%' }} />
+//         </VideoPlayer>
+//       </VideoSection>
+
+//       {/* Chat Section */}
+//       <ChatSection>
+//         <ChatHeader>Live Chat</ChatHeader>
+//         <ChatMessages>
+//           {messages?.map((msg, index) => (
+//             <p key={index}><strong>{msg}</strong></p>
+//           ))}
+//         </ChatMessages>
+
+//         <ChatInputContainer>
+//           <ChatInput
+//             type="text"
+//             placeholder="Type a message..."
+//             value={message}
+//             onChange={(e) => setMessage(e.target.value)}
+//           />
+//           <SendButton onClick={sendMessage}>Send</SendButton>
+//         </ChatInputContainer>
+//       </ChatSection>
+//     </Container>
+//   )
+// }
+
+// export default GetStreaming
+
+
+
+const GetStreaming = () => {
+  const { currentUser } = useSelector(state => state.common);
+  const remoteVideoRef = useRef(null);
+  const peerConnection = useRef(null);
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState('');
+
+  const config = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' }
+    ]
+  };
+
+  const createPeerConnection = () => {
+    peerConnection.current = new RTCPeerConnection(config);
+
+    // Handle remote stream
+    peerConnection.current.ontrack = (event) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+
+    // Handle ICE candidates
+    peerConnection.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('ice-candidate', event.candidate);
+      }
+    };
+  };
+
+  useEffect(() => {
+    // Listen for chat messages
+    socket.on('chat-message', (msg) => {
+      setMessages(prevMessages => [...prevMessages, msg]);
+    });
+
+    // Handle offer from the broadcaster
+    socket.on('offer', async (offer) => {
+      console.log('Received offer:', offer);
+      createPeerConnection();
+
+      // Set remote description and create answer
+      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.current.createAnswer();
+      await peerConnection.current.setLocalDescription(answer);
+      socket.emit('answer', answer);
+    });
+
+    // Handle ICE candidate from the broadcaster
+    socket.on('ice-candidate', (candidate) => {
+      if (peerConnection.current) {
+        peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate))
+          .catch(error => console.error('Error adding ICE candidate:', error));
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('chat-message');
+      socket.off('offer');
+      socket.off('ice-candidate');
+      if (peerConnection.current) {
+        peerConnection.current.close();
+        peerConnection.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const videoElement = remoteVideoRef.current;
+
+    if (videoElement) {
+      videoElement.addEventListener('loadedmetadata', () => {
+        videoElement.play().catch(error => {
+          console.error('Autoplay error:', error);
+        });
+      });
+    }
+
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('loadedmetadata', () => {});
+      }
+    };
+  }, []);
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (message.trim()) {
+      const messageData = {
+        username: currentUser?.name,
+        message: message
+      };
+      socket.emit('chat-message', messageData);
+      setMessage('');
+    }
+  };
+
+  return (
+    <Container>
+      <VideoSection>
+        <VideoPlayer>
+          <video ref={remoteVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%' }} />
+        </VideoPlayer>
+      </VideoSection>
+
+      {/* Chat Section */}
+      <ChatSection>
+        <ChatHeader>Live Chat</ChatHeader>
+        <ChatMessages>
+          {messages?.map((msg, index) => (
+            <p key={index}><strong>{msg}</strong></p>
+          ))}
+        </ChatMessages>
+
+        <ChatInputContainer>
+          <ChatInput
+            type="text"
+            placeholder="Type a message..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          <SendButton onClick={sendMessage}>Send</SendButton>
+        </ChatInputContainer>
+      </ChatSection>
+    </Container>
+  );
+};
+
+export default GetStreaming;

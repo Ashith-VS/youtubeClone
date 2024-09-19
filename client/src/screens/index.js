@@ -6,6 +6,7 @@ import LiveStreamming from "./LIveStreamming"
 import SignIn from "./Auth/SignIn"
 import SignUp from "./Auth/SignUp"
 import Profile from "./Profile"
+import GetStreaming from "./GetStreaming"
 
 export {
     Home,
@@ -15,5 +16,6 @@ export {
     LiveStreamming,
     SignIn,
     SignUp,
-    Profile
+    Profile,
+    GetStreaming
 }

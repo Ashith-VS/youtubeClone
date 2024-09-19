@@ -106,7 +106,55 @@ const Container = styled.div`
   padding: 20px;
   box-sizing: border-box;
 `;
+const StreamInfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+`;
 
+const Input = styled.input`
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &::placeholder {
+    color: #aaa;
+  }
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(38, 143, 255, 0.3);
+  }
+`;
+const Textarea = styled.textarea`
+  width: 100%;
+  max-width: 400px;
+  min-height: 100px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  resize: vertical;  // Allows resizing vertically
+
+  &::placeholder {
+    color: #aaa;
+  }
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(38, 143, 255, 0.3);
+  }
+`;
 const VideoSection = styled.div`
   flex: 2;
   background-color: ${({ theme }) => theme.bgLighter};
@@ -210,4 +258,10 @@ const PlayPauseButton = styled.button`
     background-color: ${({ theme }) => theme.textSoft};
     color: ${({ theme }) => theme.bgLighter};
   }`
-export { Container, VideoSection, VideoPlayer, ChatSection, ChatHeader, ChatMessages, ChatInputContainer, ChatInput, SendButton,PlayPauseButton };
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+`;
+
+export { Container, VideoSection, VideoPlayer, ChatSection, ChatHeader, ChatMessages, ChatInputContainer, ChatInput, SendButton, PlayPauseButton, StreamInfoSection, Input, Textarea, ErrorMessage };

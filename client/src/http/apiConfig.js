@@ -18,7 +18,7 @@ export const UrlEndPoint = {
     addVideo:'/api/video',
     recommendation:tags=>`/api/video/tags?tags=${tags}`,
     search:query=>`/api/video/search${query}`,
+    liveStart:'/api/live/start',
+    liveEnd:'/api/live/stop',
+    live:'/api/live',
 }
-// updateVideo:'/api/video',
-// deleteVideo:'/api/video',
-// addView:'/api/video/view'

@@ -14,12 +14,17 @@ const Search = () => {
     const [videos, setVideos] = useState([]);
     const query =useLocation().search
 
+    const resfetch=async()=>{
+const res = await networkRequest({})
+    }
+
     useEffect(()=>{
        const fetchVideos = async()=>{
         try {
         const url = UrlEndPoint.search(query)
          const res = await networkRequest({url})
          setVideos(res)
+
         } catch (error) {
             console.error(error)
         }
