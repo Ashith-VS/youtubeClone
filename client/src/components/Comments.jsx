@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import Comment from './Comment';
+import React, { lazy, Suspense, useEffect, useState } from 'react'
 import { UrlEndPoint } from '../http/apiConfig';
 import networkRequest from '../http/api';
 import { useSelector } from 'react-redux';
@@ -12,6 +11,9 @@ import {
 } from "../assets/css/comments"
 import { isEmpty } from 'lodash';
 import { toast } from 'react-toastify';
+// import Comment from './Comment';
+// Lazy loading Comment component
+const Comment = lazy(() => import('./Comment'));
 
 const Comments = ({ videoId }) => {
   const [desc, setDesc] = useState('');
@@ -33,7 +35,7 @@ const Comments = ({ videoId }) => {
   }, [videoId]);
 
   const handleAddComment = async () => {
-    if(!isEmpty(currentUser)){
+    if (!isEmpty(currentUser)) {
       const data = { videoId, desc }
       const url = UrlEndPoint.addComment
       try {
@@ -43,7 +45,7 @@ const Comments = ({ videoId }) => {
       } catch (error) {
         console.error(error);
       }
-    }else{
+    } else {
       toast.error('Please sign in to add a comment.')
       return;
     }
@@ -57,10 +59,12 @@ const Comments = ({ videoId }) => {
         <Input placeholder="Add a comment..." onChange={(e) => setDesc(e.target.value)} name='desc' value={desc} />
         <SendIcon onClick={handleAddComment} />
       </NewComment>
-      {comments.map((comment) => {
-        return <Comment key={comment?._id} comment={comment} />
-      }
-      )}
+      <Suspense fallback={<div>Loading ....</div>}>
+        {comments.map((comment) => {
+          return <Comment key={comment?._id} comment={comment} />
+        }
+        )}
+      </Suspense>
     </Container>
   )
 }

@@ -24,6 +24,17 @@ const Video = () => {
   const dispatch = useDispatch();
   const {id}=useParams()
   const [channel,setChannel]=useState({})
+
+  const addViews=async()=>{
+    try {
+      const url=UrlEndPoint.views(id)
+      const res=await networkRequest({url,method:'put'})
+      console.log('res: ', res);
+    } catch (error) {
+      console.error(error)
+    }
+
+  }
   
 const fetchData = async () => {
   try {
@@ -45,6 +56,7 @@ const fetchData = async () => {
 
 useEffect(() => {
     fetchData();
+    addViews(); 
 }, [id])
 
 

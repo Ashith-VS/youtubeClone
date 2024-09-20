@@ -1,8 +1,6 @@
 import axios from "axios";
 import { baseUrl } from "./apiConfig";
 
-
-
 let activeRequests = 0;
 
 const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, dispatch) => {

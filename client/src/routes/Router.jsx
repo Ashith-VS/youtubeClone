@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { GetStreaming, Home, LiveStreamming, Profile, Search, SignIn, SignUp, UploadVideo, Video } from '../screens';
 import styled, { ThemeProvider } from 'styled-components';
@@ -28,6 +28,7 @@ const Router = () => {
           <Main>
             <Navbar />
             <Wrapper>
+            <Suspense fallback={<div>Loading...</div>}>
               <Routes>
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
@@ -41,6 +42,7 @@ const Router = () => {
                 <Route path="/live/:id" element={<GetStreaming />} />
                 <Route path="/profile" element={<Profile />} />
               </Routes>
+              </Suspense>
             </Wrapper>
           </Main>
         </BrowserRouter>

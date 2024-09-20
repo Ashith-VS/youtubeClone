@@ -39,41 +39,7 @@ const LiveStreaming = () => {
       { urls: 'stun:stun.l.google.com:19302' }
     ]
   };
-//   let mediaRecorder;
-// const recordedChunks = [];
-
-// const startRecording = (stream) => {
-//   mediaRecorder = new MediaRecorder(stream);
   
-//   mediaRecorder.ondataavailable = (event) => {
-//     if (event.data.size > 0) {
-//       recordedChunks.push(event.data);
-//     }
-//   };
-
-//   mediaRecorder.onstop = () => {
-//     const blob = new Blob(recordedChunks, {
-//       type: 'video/webm'
-//     });
-//     const videoUrl = URL.createObjectURL(blob);
-
-//     // Save video URL to the database or upload it to storage
-//     console.log('Video URL:', videoUrl);
-//     saveVideoToDB(videoUrl);
-//   };
-
-//   mediaRecorder.start();
-// };
-
-// const stopRecording = () => {
-//   if (mediaRecorder) {
-//     mediaRecorder.stop();
-//   }
-// };
-
-
-  
-
   const createPeerConnection = () => {
     peerConnection.current = new RTCPeerConnection(config);
     peerConnection.current.onicecandidate = (event) => {
@@ -128,10 +94,6 @@ const LiveStreaming = () => {
     try {
       // Stop the local video and audio tracks
       localStream.current?.getTracks().forEach((track) => track.stop());
-
-    //    // Stop recording
-    // stopRecording();
-
       // Close the peer connection
       peerConnection.current?.close();
       peerConnection.current = null;
@@ -163,31 +125,7 @@ const LiveStreaming = () => {
       setMessage('');
     }
   };
-
-  // const saveVideoToDB = async (videoUrl) => {
-  //   try {
-  //     const streamId = localStorage.getItem('streamId');
-  //     if (!streamId) {
-  //       console.error('Stream ID is missing');
-  //       return;
-  //     }
-
-  //     const url = UrlEndPoint.liveEnd; // Assuming you use this endpoint to update stream info
-  //     const response = await networkRequest({
-  //       url,
-  //       method: 'post',
-  //       data: { streamId, videoUrl }
-  //     });
-
-  //     if (response?.status === 'ok') {
-  //       console.log('Video URL saved successfully');
-  //     } else {
-  //       console.error('Failed to save video URL');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error saving video URL:', error);
-  //   }
-  // };
+  
 
   useEffect(() => {
     socket.on('chat-message', (msg) => {

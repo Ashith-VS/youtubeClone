@@ -11,7 +11,6 @@ import { isEmpty } from 'lodash';
 
 const SignIn = () => {
   const { currentUser } = useSelector(state => state.common)
-  console.log('currentUser: ', !isEmpty(currentUser));
   const [errors, setErrors] = useState({})
   const { error } = useSelector(state => state.auth)
   const dispatch = useDispatch();

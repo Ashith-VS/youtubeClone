@@ -95,7 +95,7 @@ const UploadVideo = () => {
     return (
         <Container>
             <Wrapper>
-                <Title>Upload  a New Video</Title>
+                <Title>Upload a New Video</Title>
                 <Label>Video:</Label>
                 {percentage.videoPercentage > 0 ? ("Uploading:" + percentage?.videoPercentage + '%') : (<>
                     <Input type="file" accept='video/*' id="file" onChange={(e) => {
