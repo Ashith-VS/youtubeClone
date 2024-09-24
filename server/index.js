@@ -35,6 +35,12 @@ app.use('/', router)
 // Socket.IO connection
 io.on('connection', (socket) => {
     console.log('User connected', socket.id);
+    
+     // Join a specific room
+     socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        console.log(`${socket.id} joined room ${roomId}`);
+    });
 
     // Handle chat messages
     socket.on('chat-message', (data) => {

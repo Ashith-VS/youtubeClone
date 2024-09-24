@@ -6,7 +6,6 @@ import { UrlEndPoint } from '../http/apiConfig';
 import {Container, Image, Details, ChannelImage, Texts, Title, ChannelName, Info} from "../assets/css/card"
 
 const Card = ({type,video}) => {
-
   const [channel,setChannel]=useState({})
 
   const fetchChannels=async()=>{
@@ -24,6 +23,7 @@ const Card = ({type,video}) => {
     fetchChannels()
   }
   },[video?.userId])
+
 
   return (
     <Link to={video?.isActive===true?`/live/${video?._id}`:`/video/${video?._id}`} style={{ textDecoration: "none" }}>

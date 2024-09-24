@@ -21,5 +21,6 @@ export const UrlEndPoint = {
     liveStart:'/api/live/start',
     liveEnd:'/api/live/stop',
     live:'/api/live',
+    findlive:id=>`/api/live/${id}`,
     views:(id)=>`/api/video/view/${id}`,
 }
