@@ -27,7 +27,7 @@ const Card = ({type,video}) => {
 
   return (
     <Link to={video?.isActive===true?`/live/${video?._id}`:`/video/${video?._id}`} style={{ textDecoration: "none" }}>
-    <Container  type={type}>
+    <Container type={type}>
     <Image
          type={type}
          src={video?.imgUrl}
@@ -42,7 +42,7 @@ const Card = ({type,video}) => {
            {video?.isActive===true&& <span style={{color:'red'}}>Live</span>}
            <Title>{video?.title}</Title>
            <ChannelName>{channel?.name}</ChannelName>
-           <Info>{video?.views} views • {format(video?.createdAt)}</Info>
+           <Info>{video?.views} views • {video.isActive=== false ? `streamed ${format(video?.createdAt)}`:format(video?.createdAt)}</Info>
          </Texts>
        </Details>
    </Container>

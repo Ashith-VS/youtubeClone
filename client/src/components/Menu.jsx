@@ -95,8 +95,7 @@ const Menu = ({ darkMode, setDarkMode }) => {
           <ArticleOutlinedIcon />
           News
         </Item>
-
-        {!isEmpty(currentUser)&&<Item onClick={() => { navigate('/live') }}>
+        {!isEmpty(currentUser)&&<Item onClick={() => { navigate('/livelist') }}>
           <LiveTvOutlinedIcon />
           Live
         </Item>}

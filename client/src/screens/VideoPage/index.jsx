@@ -121,7 +121,7 @@ const Video = () => {
     <Container>
       <Content>
         <VideoWrapper>
-          <VideoFrame src={currentVideo?.videoUrl} controls />
+          <VideoFrame src={currentVideo?.videoUrl} controls autoPlay/>
         </VideoWrapper>
         <Title>{currentVideo?.title}</Title>
         <Details>

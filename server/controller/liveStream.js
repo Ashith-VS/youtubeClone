@@ -40,7 +40,17 @@ export const stopLiveStream = async (req, res) => {
 };
 
 // Get all active live streams
-export const getLiveStreams = async (req, res) => {
+export const getAllActiveLiveStreams = async (req, res) => {
+    try {
+        const liveStreams = await LiveStream.find({ isActive: true }).populate('user', 'username');
+        res.status(200).json(liveStreams);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching live streams', error });
+    }
+};
+
+// Get all  live streams
+export const getAllLiveStreams = async (req, res) => {
     try {
         const liveStreams = await LiveStream.find({ isActive: false }).populate('user', 'username');
         res.status(200).json(liveStreams);
@@ -48,6 +58,8 @@ export const getLiveStreams = async (req, res) => {
         res.status(500).json({ message: 'Error fetching live streams', error });
     }
 };
+
+
 
 // Get a specific live stream by its ID
 export const getLiveStreamById = async (req, res) => {

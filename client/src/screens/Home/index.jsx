@@ -9,33 +9,45 @@ const Home = ({ type }) => {
 
   const fetchVideos = async () => {
     try {
-      const url = UrlEndPoint[type]
-      const res = await networkRequest({ url })
-      return res
+      const urls = [UrlEndPoint[type], UrlEndPoint.live]; // List all URLs
+      const results = await Promise.all(urls.map((url) => networkRequest({ url })));
+      setVideos(results.flat())  // Flatten the array of results
     } catch (error) {
-      console.error(error)
+      console.error('Error fetching videos:', error);
     }
-  }
+  };
 
-  const fetchLiveVideos = async () => {
-    try {
-      const url = UrlEndPoint.live
-      const res = await networkRequest({ url })
-      return res;
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  // const fetchVideos = async () => {
+  //   try {
+  //     const url = UrlEndPoint[type]
+  //     const res = await networkRequest({ url })
+  //     return res
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
+
+  // const fetchLiveVideos = async () => {
+  //   try {
+  //     const url = UrlEndPoint.live
+  //     const res = await networkRequest({ url })
+  //     return res;
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
+
 
   useEffect(() => {
-    const fetchAllVideos = async () => {
-      const [normalVideos, liveVideos] = await Promise.all([fetchVideos(), fetchLiveVideos()]);
-      // Merge the two arrays, avoiding duplicates if necessary
-      const allVideos = [...normalVideos, ...liveVideos];
-      setVideos(allVideos);
-    };
-
-    fetchAllVideos();
+    // const fetchAllVideos = async () => {
+    //     const [normalVideos, liveVideos,activeLive] = await Promise.all([fetchVideos(), fetchLiveVideos()]);
+    //     // Merge the arrays, avoiding duplicates if necessary
+    //     const allVideos = [...normalVideos, ...liveVideos];
+    //     setVideos(allVideos);
+    //   };
+    // }
+    // fetchAllVideos();
+    fetchVideos()
   }, [type])
 
   return (

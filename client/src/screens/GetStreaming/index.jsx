@@ -2,27 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { ChatHeader, ChatInput, ChatInputContainer, ChatMessages, ChatSection, Container, PlayPauseButton, SendButton, VideoPlayer, VideoSection } from '../../assets/css/live'
 import { useSelector } from 'react-redux';
 import { socket } from '../../common/common';
-import { useParams } from 'react-router-dom';
 import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
 
 const GetStreaming = () => {
-  const { id } = useParams()
   const { currentUser } = useSelector(state => state.common);
   const remoteVideoRef = useRef(null);
   const peerConnection = useRef(null);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
-
-  // const fetchLiveVideo = async () => {
-  //   try {
-  //     const url = UrlEndPoint.findlive(id)
-  //     const res = await networkRequest({ url })
-   
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
 
   const config = {
     iceServers: [
@@ -58,6 +46,7 @@ const GetStreaming = () => {
 
     // Handle offer from the broadcaster
     socket.on('offer', async (offer) => {
+      console.log('offer: ', offer);
       createPeerConnection();
 
       // Set remote description and create answer
@@ -66,7 +55,6 @@ const GetStreaming = () => {
       await peerConnection.current.setLocalDescription(answer);
       socket.emit('answer', answer);
     });
-    // fetchLiveVideo()
     // Handle ICE candidate from the broadcaster
     socket.on('ice-candidate', (candidate) => {
       if (peerConnection.current) {
@@ -89,7 +77,6 @@ const GetStreaming = () => {
 
   useEffect(() => {
     const videoElement = remoteVideoRef.current;
-
     if (videoElement) {
       videoElement.addEventListener('loadedmetadata', () => {
         videoElement.play().catch(error => {

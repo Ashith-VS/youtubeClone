@@ -177,7 +177,6 @@ const LiveStreaming = () => {
       // Save video metadata to the database
       const url = UrlEndPoint.liveStart
       const res = await networkRequest({ url, method: "post", data: formData })
-      console.log('res: ', res);
       if (res) {
         localStorage.setItem('streamId', res._id)
       }

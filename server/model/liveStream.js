@@ -6,6 +6,7 @@ const liveStreamSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     isActive: { type: Boolean, default: true },
     videoUrl: { type: String},
+    videoLive:{type: Boolean, default: true},
     createdAt: { type: Date, default: Date.now }
 });
 
