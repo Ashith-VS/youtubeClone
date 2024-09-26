@@ -21,7 +21,7 @@ import { isEmpty } from 'lodash';
 const Video = () => {
   const { currentUser } = useSelector(state => state.common)
   const { currentVideo } = useSelector(state => state.video)
-  console.log('currentVideo: ', currentVideo);
+
   const dispatch = useDispatch();
   const { id } = useParams()
   const [channel, setChannel] = useState({})
@@ -30,7 +30,15 @@ const Video = () => {
     try {
       const url = UrlEndPoint.findlive(id)
       const res = await networkRequest({ url })
+      console.log(' res: ',  res);
       dispatch(fetchSuccess(res))
+       // Fetch the  channel data from video response
+       const userId = res.user;
+       if (userId) {
+         const userUrl = UrlEndPoint.user(userId);
+         const userRes = await networkRequest({ url: userUrl });
+         setChannel(userRes);
+       }
     } catch (error) {
       console.error(error)
     }
@@ -43,7 +51,6 @@ const Video = () => {
     } catch (error) {
       console.error(error)
     }
-
   }
 
   const fetchData = async () => {
@@ -51,7 +58,7 @@ const Video = () => {
       const videoUrl = UrlEndPoint.video(id);
       const videoRes = await networkRequest({ url: videoUrl });
       dispatch(fetchSuccess(videoRes)); // Update video state
-
+    
       // Fetch the channel data using userId from video response
       const userId = videoRes.userId;
       if (userId) {
@@ -98,7 +105,6 @@ const Video = () => {
       toast.error('Please login to like or dislike videos.')
     }
   }
-
 
   const handleSubscribe = async () => {
     if (!isEmpty(currentUser)) {

@@ -43,52 +43,17 @@ const LiveStreaming = () => {
 
   useEffect(() => {
     // stop recording when fordata.videourl gets
-    if(!isEmpty(formData.videoUrl)){
+    if (!isEmpty(formData.videoUrl)) {
       const videoUrl = formData.videoUrl;
-      // Close the peer connection
-      peerConnection.current?.close();
-      peerConnection.current = null;
-
-      // Clear video elements
-      localVideoRef.current.srcObject = null;
       const url = UrlEndPoint.liveEnd;
       const streamId = localStorage.getItem('streamId');
-
       networkRequest({ url, method: 'post', data: { streamId, videoUrl } }).then((res) => {
         if (res?.status === 'ok') {
           localStorage.removeItem('streamId');
-          // Stop the local video and audio tracks
-          localStream.current?.getTracks().forEach((track) => track.stop());
         }
-        setIsStreaming(false);
-        setFormData({ title: '', description: '', videoUrl: '' });
       })
     }
   }, [formData.videoUrl])
-  
-
-  const config = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' }
-    ]
-  };
-
-  const createPeerConnection = () => {
-    peerConnection.current = new RTCPeerConnection(config);
-    peerConnection.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit('ice-candidate', event.candidate);
-      }
-    };
-  };
-
-  const handleReceiveAnswer = async (answer) => {
-    await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
-  };
-
-  const handleNewICECandidate = (candidate) => {
-    peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-  };
 
   const uploadVideo = async (file) => {
     const filename = `${file?.name}_${uuid()}`// Generate a unique name using UUID
@@ -111,6 +76,50 @@ const LiveStreaming = () => {
     )
   }
 
+  const config = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' }
+    ]
+  };
+
+  const createPeerConnection = () => {
+    peerConnection.current = new RTCPeerConnection(config);
+    peerConnection.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        const roomId = localStorage.getItem('streamId'); // Get the stored roomId
+        socket.emit('ice-candidate', event.candidate, roomId);
+      }
+    };
+  };
+
+  const handleReceiveAnswer = async (answer) => {
+    await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+  };
+
+  const handleNewICECandidate = (candidate) => {
+    peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+  };
+
+
+  useEffect(() => {
+    socket.on('chat-message', (msg) => {
+      setMessages((prevMessages) => [...prevMessages, msg]);
+    });
+
+    socket.on('answer', handleReceiveAnswer,);
+    socket.on('ice-candidate', handleNewICECandidate);
+
+    return () => {
+      socket.off('chat-message');
+      socket.off('answer');
+      socket.off('ice-candidate');
+      localStream.current?.getTracks().forEach(track => track.stop());
+      peerConnection.current?.close();
+    };
+  }, []);
+
+
+
   const startRecording = async (stream) => {
     // Reset the chunks at the start of a new recording session
     chunksRef.current = [];
@@ -128,6 +137,52 @@ const LiveStreaming = () => {
     console.log('Recording started...');
   };
 
+
+
+  const startStreaming = async () => {
+    if (!formData.title || !formData.description) {
+      setErrorMessage('Title and Description are required to start streaming');
+      return;
+    }
+    setErrorMessage('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideoRef.current.srcObject = stream;
+
+      localStream.current = stream;
+
+      // Use the stream's ID as the room ID
+      const roomId = stream.id;
+      localStorage.setItem('streamId',roomId);// Store the streamId in localStorage
+      socket.emit('join-room', roomId); // Broadcaster joins the room
+      console.log(`Joined room: ${roomId}`);
+
+      createPeerConnection();
+      // stream.getTracks().forEach((track) => peerConnection.current.addTrack(track, stream));
+      stream.getTracks().forEach((track) => {
+        peerConnection.current.addTrack(track, stream);
+        console.log('Adding track:', track);
+      });
+
+
+      const offer = await peerConnection.current.createOffer();
+      await peerConnection.current.setLocalDescription(offer);
+      socket.emit('offer', offer, roomId); // Include roomId when sending the offer
+
+      // Start recording when streaming starts
+      startRecording(stream);
+
+      // Save video metadata to the database
+      const url = UrlEndPoint.liveStart
+      const Data = { ...formData, streamId: roomId }
+
+      const res = await networkRequest({ url, method: "post", data: Data })
+      // console.log('res: ', res);
+      setIsStreaming(true);
+    } catch (error) {
+      console.error('Error accessing media devices:', error);
+    }
+  };
 
   const stopRecording = () => {
     return new Promise((resolve) => {
@@ -153,75 +208,42 @@ const LiveStreaming = () => {
   };
 
 
-  const startStreaming = async () => {
-    if (!formData.title || !formData.description) {
-      setErrorMessage('Title and Description are required to start streaming');
-      return;
-    }
-    setErrorMessage('');
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localVideoRef.current.srcObject = stream;
-      localStream.current = stream;
-
-      createPeerConnection();
-      stream.getTracks().forEach((track) => peerConnection.current.addTrack(track, stream));
-
-      const offer = await peerConnection.current.createOffer();
-      await peerConnection.current.setLocalDescription(offer);
-      socket.emit('offer', offer);
-
-      // Start recording when streaming starts
-      startRecording(stream);
-
-      // Save video metadata to the database
-      const url = UrlEndPoint.liveStart
-      const res = await networkRequest({ url, method: "post", data: formData })
-      if (res) {
-        localStorage.setItem('streamId', res._id)
-      }
-      
-      setIsStreaming(true);
-    } catch (error) {
-      console.error('Error accessing media devices:', error);
-    }
-  };
 
   const stopStreaming = async () => {
-      // Stop recording and wait for it to complete
-      await stopRecording()
+    // Stop recording and wait for it to complete
+    await stopRecording()
+    // Close the peer connection
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
+    }
+
+    // Clear video elements
+    localVideoRef.current.srcObject = null;
+    // Stop the local video and audio tracks
+    if (localStream.current) {
+      localStream.current.getTracks().forEach(track => track.stop());
+    }
+    // Clear chat messages
+    setMessages([]);
+
+    setIsStreaming(false);
+    setFormData({ title: '', description: '', videoUrl: '' });
   };
-  
+
 
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
       const messageData = {
         username: currentUser?.name,
-        message: message
+        message: message,
+        roomId: localStorage.getItem('streamId'), // Add room ID here  
       };
-      socket.emit('chat-message', messageData);
+      socket.emit('chat-message', messageData, localStorage.getItem('streamId'));
       setMessage('');
     }
   };
-
-
-  useEffect(() => {
-    socket.on('chat-message', (msg) => {
-      setMessages((prevMessages) => [...prevMessages, msg]);
-    });
-
-    socket.on('answer', handleReceiveAnswer);
-    socket.on('ice-candidate', handleNewICECandidate);
-
-    return () => {
-      localStream.current?.getTracks().forEach(track => track.stop());
-      peerConnection.current?.close();
-      socket.off('chat-message');
-      socket.off('answer');
-      socket.off('ice-candidate');
-    };
-  }, []);
 
   return (
     <Container>

@@ -25,48 +25,49 @@ const connect = () => {
         .catch(error => console.error('Error connecting to MongoDB:', error));
 }
 
-// app.listen(PORT, () => {
-//     connect()
-//     console.log(`Server is running on port ${PORT}`);
-// });
 
 app.use('/', router)
 
-// Socket.IO connection
+// // Socket.IO connection
 io.on('connection', (socket) => {
     console.log('User connected', socket.id);
-    
-     // Join a specific room
-     socket.on('join-room', (roomId) => {
-        socket.join(roomId);
+
+    // User joins a specific room
+    socket.on('join-room', (roomId) => {
         console.log(`${socket.id} joined room ${roomId}`);
+        socket.join(roomId);
     });
 
-    // Handle chat messages
+
+    // WebRTC offer
+    socket.on('offer', (offer, roomId) => {
+        socket.to(roomId).emit('offer', offer);  // Send offer to the specific room
+    });
+
+    // WebRTC answer
+    socket.on('answer', (answer, roomId) => {
+
+        socket.to(roomId).emit('answer', answer);  // Send answer to the specific room
+    });
+
+    // ICE candidate
+    socket.on('ice-candidate', (candidate, roomId) => {
+        socket.to(roomId).emit('ice-candidate', candidate);  // Send ICE candidate to the specific room
+    });
+
+    // Handle chat messages sent to a specific room
     socket.on('chat-message', (data) => {
-        const { username, message } = data;
-        io.emit('chat-message', `${username}: ${message}`);
-    });
-
-    // Handle WebRTC signaling (offer, answer, ICE candidates)
-    socket.on('offer', (offer) => {
-        socket.broadcast.emit('offer', offer);
-    });
-
-    socket.on('answer', (answer) => {
-        socket.broadcast.emit('answer', answer);
-    });
-
-    socket.on('ice-candidate', (candidate) => {
-        socket.broadcast.emit('ice-candidate', candidate);
+        const { username, message, roomId } = data;
+        console.log('username, message,: roomId: ', username, message, roomId);
+        io.to(roomId).emit('chat-message', `${username}: ${message}`);  // Emit chat to the specific room
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected', socket.id);
+        socket.leaveAll();  // Ensure the user leaves all joined rooms
     });
 });
-
 
 // Start the server
 server.listen(PORT, () => {

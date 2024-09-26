@@ -8,7 +8,6 @@ import {Container,
   Name,
   Date,
   Text}from "../assets/css/comment"
-  import DeleteIcon from '@mui/icons-material/Delete';
 
 const Comment = ({comment}) => {
 const [CommentedUser,setCommentedUser]=useState({})
@@ -18,6 +17,7 @@ const fetchCommentedUser=async()=>{
     const url =UrlEndPoint.user(comment?.userId)
    const res= await networkRequest({url})
    setCommentedUser(res)
+   
   } catch (error) {
     console.error(error)
   }

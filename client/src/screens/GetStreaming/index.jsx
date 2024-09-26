@@ -1,9 +1,9 @@
+
 import React, { useEffect, useRef, useState } from 'react'
 import { ChatHeader, ChatInput, ChatInputContainer, ChatMessages, ChatSection, Container, PlayPauseButton, SendButton, VideoPlayer, VideoSection } from '../../assets/css/live'
 import { useSelector } from 'react-redux';
 import { socket } from '../../common/common';
-import networkRequest from '../../http/api';
-import { UrlEndPoint } from '../../http/apiConfig';
+import { useParams } from 'react-router-dom';
 
 const GetStreaming = () => {
   const { currentUser } = useSelector(state => state.common);
@@ -11,34 +11,19 @@ const GetStreaming = () => {
   const peerConnection = useRef(null);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
+  const { id } = useParams();
 
   const config = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' }
     ]
   };
 
-  const createPeerConnection = () => {
-    peerConnection.current = new RTCPeerConnection(config);
-
-    // Handle remote stream
-    peerConnection.current.ontrack = (event) => {
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-    };
-
-    // Handle ICE candidates
-    peerConnection.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit('ice-candidate', event.candidate);
-      }
-    };
-  };
-
   useEffect(() => {
+    socket.emit('join-room', id)
+    
+    createPeerConnection();
+      // Viewer joins the room using roomId from the URL
     // Listen for chat messages
     socket.on('chat-message', (msg) => {
       setMessages(prevMessages => [...prevMessages, msg]);
@@ -46,14 +31,12 @@ const GetStreaming = () => {
 
     // Handle offer from the broadcaster
     socket.on('offer', async (offer) => {
-      console.log('offer: ', offer);
-      createPeerConnection();
-
+      console.log('Received offer:', offer);
       // Set remote description and create answer
       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
       const answer = await peerConnection.current.createAnswer();
       await peerConnection.current.setLocalDescription(answer);
-      socket.emit('answer', answer);
+      socket.emit('answer', answer, id); // Include room ID when sending the answer
     });
     // Handle ICE candidate from the broadcaster
     socket.on('ice-candidate', (candidate) => {
@@ -73,16 +56,28 @@ const GetStreaming = () => {
         peerConnection.current = null;
       }
     };
-  }, []);
+  }, [id]);
 
+// Ensure the video is played when metadata is loaded
   useEffect(() => {
     const videoElement = remoteVideoRef.current;
     if (videoElement) {
-      videoElement.addEventListener('loadedmetadata', () => {
+      console.log('videoElement: ', videoElement);
+      if (videoElement.readyState >= 1) {
+        // If the metadata is already loaded
+        console.log('Metadata already loaded');
         videoElement.play().catch(error => {
           console.error('Autoplay error:', error);
         });
-      });
+      } else {
+        // If the metadata is not loaded yet, add an event listener
+        videoElement.addEventListener('loadedmetadata', () => {
+          console.log('Metadata loaded. Attempting to play the video');
+          videoElement.play().catch(error => {
+            console.error('Autoplay error:', error);
+          });
+        });
+      }
     }
 
     return () => {
@@ -92,14 +87,35 @@ const GetStreaming = () => {
     };
   }, []);
 
+  const createPeerConnection = () => {
+    peerConnection.current = new RTCPeerConnection(config);
+    console.log(' peerConnection.current: ',  peerConnection.current);
+    // Handle remote stream
+    console.log(' peerConnection.current.ontrack: ',  peerConnection.current.ontrack);
+    peerConnection.current.ontrack = (event) => {
+      console.log('event: ', event);
+      if (remoteVideoRef.current) {
+        console.log('remoteVideoRef.current: ', remoteVideoRef.current);
+        remoteVideoRef.current.srcObject = event.streams[0];
+      }
+    };
+    // Handle ICE candidates
+    peerConnection.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('ice-candidate', event.candidate ,id);// Pass roomId here
+      }
+    };
+  };
+
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
       const messageData = {
         username: currentUser?.name,
-        message: message
+        message: message,
+        roomId: id // Include room ID when sending messages
       };
-      socket.emit('chat-message', messageData);
+      socket.emit('chat-message', messageData,id);// Ensure the roomId is included
       setMessage('');
     }
   };
@@ -108,7 +124,7 @@ const GetStreaming = () => {
     <Container>
       <VideoSection>
         <VideoPlayer>
-          <video ref={remoteVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%' }} />
+          <video ref={remoteVideoRef} autoPlay playsInline  style={{ width: '100%', height: '100%' }} />
         </VideoPlayer>
       </VideoSection>
 

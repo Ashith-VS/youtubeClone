@@ -24,9 +24,8 @@ const Card = ({type,video}) => {
   }
   },[video?.userId])
 
-
   return (
-    <Link to={video?.isActive===true?`/live/${video?._id}`:`/video/${video?._id}`} style={{ textDecoration: "none" }}>
+    <Link to={video?.isActive===true?`/live/${video?.streamId}`:`/video/${video?._id}`} style={{ textDecoration: "none" }}>
     <Container type={type}>
     <Image
          type={type}
