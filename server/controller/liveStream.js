@@ -3,13 +3,15 @@ import LiveStream from "../model/liveStream.js";
 // Start a new live stream
 export const startLiveStream = async (req, res) => {
     try {
-        const { title, description,streamId,videoUrl } = req.body;
+        const { title, description,streamId,videoUrl,thumbnail } = req.body;
+        console.log('req.body: ', req.body);
         const newStream = new LiveStream({
             streamId,  // unique identifier for the live stream
             title,
             description,
             user: req.id,
             isActive: true,
+            thumbnail,
             videoUrl,  // will store the video URL for later use
         });
         await newStream.save();

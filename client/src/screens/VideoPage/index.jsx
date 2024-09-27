@@ -17,6 +17,7 @@ import { Container, Content, VideoWrapper, Title, Details, Info, Buttons, Button
 import Recommendation from '../../components/Recommendation';
 import { toast } from 'react-toastify';
 import { isEmpty } from 'lodash';
+import { formatViews } from '../../constants/common';
 
 const Video = () => {
   const { currentUser } = useSelector(state => state.common)
@@ -26,19 +27,19 @@ const Video = () => {
   const { id } = useParams()
   const [channel, setChannel] = useState({})
 
-  const fetchLiveVideo=async()=>{
+  const fetchLiveVideo = async () => {
     try {
       const url = UrlEndPoint.findlive(id)
       const res = await networkRequest({ url })
-      console.log(' res: ',  res);
+      console.log(' res: ', res);
       dispatch(fetchSuccess(res))
-       // Fetch the  channel data from video response
-       const userId = res.user;
-       if (userId) {
-         const userUrl = UrlEndPoint.user(userId);
-         const userRes = await networkRequest({ url: userUrl });
-         setChannel(userRes);
-       }
+      // Fetch the  channel data from video response
+      const userId = res.user;
+      if (userId) {
+        const userUrl = UrlEndPoint.user(userId);
+        const userRes = await networkRequest({ url: userUrl });
+        setChannel(userRes);
+      }
     } catch (error) {
       console.error(error)
     }
@@ -58,7 +59,7 @@ const Video = () => {
       const videoUrl = UrlEndPoint.video(id);
       const videoRes = await networkRequest({ url: videoUrl });
       dispatch(fetchSuccess(videoRes)); // Update video state
-    
+
       // Fetch the channel data using userId from video response
       const userId = videoRes.userId;
       if (userId) {
@@ -127,11 +128,11 @@ const Video = () => {
     <Container>
       <Content>
         <VideoWrapper>
-          <VideoFrame src={currentVideo?.videoUrl} controls autoPlay/>
+          <VideoFrame src={currentVideo?.videoUrl} controls autoPlay />
         </VideoWrapper>
         <Title>{currentVideo?.title}</Title>
         <Details>
-          <Info>{currentVideo?.views} views • {format(currentVideo?.createdAt)}</Info>
+          <Info>{formatViews(currentVideo?.views)} views • {format(currentVideo?.createdAt)}</Info>
           <Buttons>
             <Button onClick={handleLikes}>
               {currentVideo?.likes?.includes(currentUser?._id) ? (<ThumbUpIcon />) : (<ThumbUpOutlinedIcon />)}{currentVideo?.likes?.length}

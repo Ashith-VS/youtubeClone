@@ -8,6 +8,7 @@ const liveStreamSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     videoUrl: { type: String},
     videoLive:{type: Boolean, default: true},
+    thumbnail: { type: String,required: true},
     createdAt: { type: Date, default: Date.now }
 });
 

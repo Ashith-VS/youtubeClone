@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ChatHeader, ChatInput, ChatInputContainer, ChatMessages, ChatSection, Container, PlayPauseButton, SendButton, VideoPlayer, VideoSection } from '../../assets/css/live'
 import { useSelector } from 'react-redux';
-import { socket } from '../../common/common';
+import { socket } from '../../constants/common';
 import { useParams } from 'react-router-dom';
 
 const GetStreaming = () => {
@@ -20,10 +20,11 @@ const GetStreaming = () => {
   };
 
   useEffect(() => {
+    // Viewer joins the room using roomId from the URL
     socket.emit('join-room', id)
     
     createPeerConnection();
-      // Viewer joins the room using roomId from the URL
+
     // Listen for chat messages
     socket.on('chat-message', (msg) => {
       setMessages(prevMessages => [...prevMessages, msg]);
@@ -58,7 +59,7 @@ const GetStreaming = () => {
     };
   }, [id]);
 
-// Ensure the video is played when metadata is loaded
+  // Ensure the video is played when metadata is loaded
   useEffect(() => {
     const videoElement = remoteVideoRef.current;
     if (videoElement) {
@@ -89,9 +90,8 @@ const GetStreaming = () => {
 
   const createPeerConnection = () => {
     peerConnection.current = new RTCPeerConnection(config);
-    console.log(' peerConnection.current: ',  peerConnection.current);
-    // Handle remote stream
-    console.log(' peerConnection.current.ontrack: ',  peerConnection.current.ontrack);
+
+    console.log(' peerConnection.current.ontrack: ', peerConnection.current.ontrack);
     peerConnection.current.ontrack = (event) => {
       console.log('event: ', event);
       if (remoteVideoRef.current) {
@@ -102,7 +102,7 @@ const GetStreaming = () => {
     // Handle ICE candidates
     peerConnection.current.onicecandidate = (event) => {
       if (event.candidate) {
-        socket.emit('ice-candidate', event.candidate ,id);// Pass roomId here
+        socket.emit('ice-candidate', event.candidate, id);// Pass roomId here
       }
     };
   };
@@ -115,7 +115,7 @@ const GetStreaming = () => {
         message: message,
         roomId: id // Include room ID when sending messages
       };
-      socket.emit('chat-message', messageData,id);// Ensure the roomId is included
+      socket.emit('chat-message', messageData, id);// Ensure the roomId is included
       setMessage('');
     }
   };
@@ -124,7 +124,7 @@ const GetStreaming = () => {
     <Container>
       <VideoSection>
         <VideoPlayer>
-          <video ref={remoteVideoRef} autoPlay playsInline  style={{ width: '100%', height: '100%' }} />
+          <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '100%', height: '100%' }} />
         </VideoPlayer>
       </VideoSection>
 

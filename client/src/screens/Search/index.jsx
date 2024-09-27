@@ -14,9 +14,6 @@ const Search = () => {
     const [videos, setVideos] = useState([]);
     const query =useLocation().search
 
-    const resfetch=async()=>{
-const res = await networkRequest({})
-    }
 
     useEffect(()=>{
        const fetchVideos = async()=>{

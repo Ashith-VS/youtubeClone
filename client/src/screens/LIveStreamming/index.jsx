@@ -19,7 +19,7 @@ import {
 import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
 import { useSelector } from 'react-redux';
-import { socket } from '../../common/common';
+import { socket } from '../../constants/common';
 import { storage } from '../../services/firebase';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { isEmpty } from 'lodash';
@@ -36,8 +36,10 @@ const LiveStreaming = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    videoUrl: ''
+    videoUrl: '',
+    thumbnail: '',
   });
+  console.log('formData: ', formData);
   const mediaRecorder = useRef(null);
   const chunksRef = useRef([]);
 
@@ -75,6 +77,7 @@ const LiveStreaming = () => {
       }
     )
   }
+
 
   const config = {
     iceServers: [
@@ -118,8 +121,6 @@ const LiveStreaming = () => {
     };
   }, []);
 
-
-
   const startRecording = async (stream) => {
     // Reset the chunks at the start of a new recording session
     chunksRef.current = [];
@@ -128,8 +129,6 @@ const LiveStreaming = () => {
     mediaRecorder.current.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
         chunksRef.current.push(event.data);
-        console.log('Chunk added:', event.data.size);
-        console.log('Total chunks so far:', chunksRef.current.length);
       }
     };
     // Start recording
@@ -138,6 +137,7 @@ const LiveStreaming = () => {
   };
 
 
+  console.log('!isEmpty(formData.thumbnail): ', isEmpty(formData.thumbnail));
 
   const startStreaming = async () => {
     if (!formData.title || !formData.description) {
@@ -153,7 +153,7 @@ const LiveStreaming = () => {
 
       // Use the stream's ID as the room ID
       const roomId = stream.id;
-      localStorage.setItem('streamId',roomId);// Store the streamId in localStorage
+      localStorage.setItem('streamId', roomId);// Store the streamId in localStorage
       socket.emit('join-room', roomId); // Broadcaster joins the room
       console.log(`Joined room: ${roomId}`);
 
@@ -172,6 +172,14 @@ const LiveStreaming = () => {
       // Start recording when streaming starts
       startRecording(stream);
 
+      // Capture thumbnail
+      if (isEmpty(formData.thumbnail)){
+        const thumbnailUrl = await captureThumbnail(stream);
+        console.log('Capture thumbnail: ', thumbnailUrl);
+        setFormData((prev) => ({ ...prev, thumbnail: thumbnailUrl }));
+      }
+
+
       // Save video metadata to the database
       const url = UrlEndPoint.liveStart
       const Data = { ...formData, streamId: roomId }
@@ -182,6 +190,60 @@ const LiveStreaming = () => {
     } catch (error) {
       console.error('Error accessing media devices:', error);
     }
+  };
+  const captureThumbnail = async (stream) => {
+    return new Promise((resolve) => {
+      const videoElement = document.createElement('video');
+      videoElement.srcObject = stream;
+
+      videoElement.addEventListener('loadedmetadata', () => {
+        videoElement.currentTime = 1; // Capture at 1 second
+      });
+
+      videoElement.addEventListener('timeupdate', async () => {
+        if (videoElement.currentTime >= 1) {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+          const context = canvas.getContext('2d');
+          context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+          // Convert canvas to Blob and upload
+          canvas.toBlob(async (blob) => {
+            const file = new File([blob], `thumbnail_${Date.now()}.png`, { type: 'image/png' });
+            const thumbnailUrl = await uploadThumbnail(file);
+            resolve(thumbnailUrl);
+          }, 'image/png');
+
+          videoElement.pause(); // Stop capturing after getting the frame
+        }
+      });
+
+      videoElement.play();
+    });
+  };
+
+  const uploadThumbnail = async (file) => {
+    const filename = `${file.name}_${uuid()}`;
+    const storageRef = ref(storage, `thumbnails/${filename}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Handle progress if needed
+        },
+        (error) => {
+          console.error('Thumbnail upload failed:', error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log('uploadThumbnaildownloadURL: ', downloadURL);
+            resolve(downloadURL); // Return the download URL
+          });
+        }
+      );
+    });
   };
 
   const stopRecording = () => {
@@ -223,10 +285,11 @@ const LiveStreaming = () => {
     // Stop the local video and audio tracks
     if (localStream.current) {
       localStream.current.getTracks().forEach(track => track.stop());
+      localStream.current = null;
     }
+
     // Clear chat messages
     setMessages([]);
-
     setIsStreaming(false);
     setFormData({ title: '', description: '', videoUrl: '' });
   };
@@ -262,10 +325,22 @@ const LiveStreaming = () => {
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
         {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            uploadThumbnail(file).then((resuploadThumbnail) => {
+              setFormData({ ...formData, thumbnail: resuploadThumbnail });
+            })
+          }}
+        />
       </StreamInfoSection>
 
       <VideoSection>
         <VideoPlayer>
+
+
           <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%' }} />
           <PlayPauseButton onClick={isStreaming ? stopStreaming : startStreaming}>
             {isStreaming ? 'Stop Streaming' : 'Start Streaming'}
