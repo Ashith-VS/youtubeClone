@@ -54,11 +54,19 @@ export const isSignIn = async (req, res) => {
         // // Generate refresh token (longer-lived)
         // const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '5d' })
 
-        // Save refresh token to the database
-        const token = new Token({ userId: user._id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-        await token.save();
+        // // Save refresh token to the database
+        // const token = new Token({ userId: user._id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+        // await token.save();
 
-        res.json({ success: true, message: "User logged in successfully", accessToken, refreshToken });
+  // Store refresh token in httpOnly cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: true,  // Only in production with HTTPS
+    sameSite:'None',//cross Site cookie
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+});
+
+        res.json({ success: true, message: "User logged in successfully", accessToken });
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
     }
@@ -98,3 +106,31 @@ export const isCurrentUser = async (req, res) => {
     }
 }
 
+export const refreshAccessToken = async (req, res) => {
+    const  cookies = req.cookies
+    if(!cookies?.refreshToken)return res.status(400).json({ message: "unAuthorized" });
+    const refreshToken = cookies.refreshToken
+    // console.log('refreshToken: ', refreshToken);
+    try {
+        //   Verify token
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async(err, user) => {
+            if (err) return res.status(403).json({ message: "Token is invalid || Forbidden " });
+        
+            // Generate new access token
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            res.json({ accessToken });
+        })
+    }catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+
+}
+
+// Logout Route (to invalidate refresh tokens)
+export const logout = async (req, res) => {
+    const  cookies = req.cookies
+    // console.log('cookieslogout: ', cookies);
+    if(!cookies?.refreshToken)return res.status(400).json({ message: "unauthorized" });
+    res.clearCookie('refreshToken', {httpOnly: true,sameSite:'None',secure:true});
+    res.status(200).json({ message: "Cookies cleared" });
+}

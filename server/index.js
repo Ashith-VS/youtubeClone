@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import router from './routes/index.js';
 import http from 'http';
 import { Server } from 'socket.io';
+import cookieParser from 'cookie-parser';
 
 dotenv.config()
 const app = express();
@@ -20,6 +21,7 @@ const io=new Server(server,{
 // Middleware
 app.use(cors())
 app.use(express.json());
+app.use(cookieParser())
 
 const PORT = process.env.PORT || 4000
 const MONGO_URL = process.env.MONGO_URL;
