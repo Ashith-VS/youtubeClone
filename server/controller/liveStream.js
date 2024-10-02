@@ -4,7 +4,6 @@ import LiveStream from "../model/liveStream.js";
 export const startLiveStream = async (req, res) => {
     try {
         const { title, description,streamId,videoUrl,thumbnail } = req.body;
-        console.log('req.body: ', req.body);
         const newStream = new LiveStream({
             streamId,  // unique identifier for the live stream
             title,
@@ -37,7 +36,6 @@ export const stopLiveStream = async (req, res) => {
         await liveStream.save();
         res.status(200).json({ status: 'ok', message: 'Live stream stopped' });
     } catch (error) {
-        console.log('error: ', error);
         res.status(500).json({ message: 'Error stopping live stream', error });
     }
 };

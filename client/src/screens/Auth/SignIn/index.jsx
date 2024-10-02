@@ -54,8 +54,8 @@ const SignIn = () => {
       const url = UrlEndPoint.signIn; 
       try {
         const res = await networkRequest({ url, method: 'post', data: formData });
-        if (res?.token) {
-          localStorage.setItem('auth_token', res.token);
+        if (res?.accessToken) {
+          localStorage.setItem('auth_token', res.accessToken);
           dispatch(loginSuccess(res));
           navigate('/');
         }
@@ -79,7 +79,7 @@ const SignIn = () => {
             img: result.user.photoURL,
           },
         }).then((res) => {
-          localStorage.setItem('auth_token', res?.token);
+          localStorage.setItem('auth_token', res?.accessToken);
           dispatch(loginSuccess(res));
           navigate('/');
         });

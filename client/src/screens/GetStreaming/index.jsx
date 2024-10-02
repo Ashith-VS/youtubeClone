@@ -16,13 +16,15 @@ const GetStreaming = () => {
   const config = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
     ]
   };
 
   useEffect(() => {
     // Viewer joins the room using roomId from the URL
     socket.emit('join-room', id)
-    
+
     createPeerConnection();
 
     // Listen for chat messages
@@ -32,12 +34,20 @@ const GetStreaming = () => {
 
     // Handle offer from the broadcaster
     socket.on('offer', async (offer) => {
-      console.log('Received offer:', offer);
-      // Set remote description and create answer
-      await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await peerConnection.current.createAnswer();
-      await peerConnection.current.setLocalDescription(answer);
-      socket.emit('answer', answer, id); // Include room ID when sending the answer
+      try {
+        // Set the received offer as the remote description
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+        // Create an answer and set it as the local description
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+
+        // Send the answer back to the broadcaster
+        socket.emit('answer', answer, id); 
+        console.log('Answer emitted:', answer);
+      } catch (error) {
+        console.error('Error handling offer:', error);
+      }
     });
     // Handle ICE candidate from the broadcaster
     socket.on('ice-candidate', (candidate) => {
@@ -62,6 +72,8 @@ const GetStreaming = () => {
   // Ensure the video is played when metadata is loaded
   useEffect(() => {
     const videoElement = remoteVideoRef.current;
+    console.log('remoteVideoRef.current: ', remoteVideoRef);
+
     if (videoElement) {
       console.log('videoElement: ', videoElement);
       if (videoElement.readyState >= 1) {
@@ -89,13 +101,16 @@ const GetStreaming = () => {
   }, []);
 
   const createPeerConnection = () => {
+    console.log("Creating")
     peerConnection.current = new RTCPeerConnection(config);
+    console.log('peerConnection.current: ', peerConnection.current);
 
-    console.log(' peerConnection.current.ontrack: ', peerConnection.current.ontrack);
+    // Handle when a video track is received
     peerConnection.current.ontrack = (event) => {
       console.log('event: ', event);
       if (remoteVideoRef.current) {
-        console.log('remoteVideoRef.current: ', remoteVideoRef.current);
+        console.log('Received remote stream:', event.streams[0]);
+        // Assign the received stream to the video element
         remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
@@ -152,3 +167,72 @@ const GetStreaming = () => {
 };
 
 export default GetStreaming;
+// import React, { useEffect, useRef, useState } from 'react';
+// import { socket } from '../../constants/common';
+// import { useParams } from 'react-router-dom';
+
+// const LiveViewer = () => {
+//   const [isConnected, setIsConnected] = useState(false);
+//   const remoteVideoRef = useRef(null);
+//   const peerConnection = useRef(null);
+//   const { id } = useParams();
+//   const roomId =id
+
+//   const config = {
+//     iceServers: [{ urls: 'stun:stun.l.google.com:19302' },
+//     { urls: 'stun:stun1.l.google.com:19302' },
+//     { urls: 'stun:stun2.l.google.com:19302' },]
+//   };
+
+//   useEffect(() => {
+//     peerConnection.current = new RTCPeerConnection(config);
+//     console.log('peerConnection.current : ', peerConnection.current );
+
+//     peerConnection.current.onicecandidate = (event) => {
+//       console.log('event: ', event);
+//       if (event.candidate) {
+//         socket.emit('ice-candidate', event.candidate, roomId);
+//       }
+//     };
+
+//     // When the broadcaster's stream is received, attach it to the video element
+//     peerConnection.current.ontrack = (event) => {
+//       remoteVideoRef.current.srcObject = event.streams[0];
+//     };
+
+//     socket.on('offer', async (offer) => {
+//       // Set the offer as the remote description and create an answer
+//       await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+//       const answer = await peerConnection.current.createAnswer();
+//       await peerConnection.current.setLocalDescription(answer);
+
+//       // Send the answer back to the server to send to the broadcaster
+//       socket.emit('answer', answer, roomId);
+//     });
+
+//     // Receive ICE candidates from the broadcaster
+//     socket.on('ice-candidate', async (candidate) => {
+//       await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+//     });
+
+//     // Join the room
+//     socket.emit('join-room', roomId);
+
+//     return () => {
+//       // Cleanup socket listeners and peer connection
+//       socket.off('offer');
+//       socket.off('ice-candidate');
+//       peerConnection.current.close();
+//     };
+//   }, [roomId]);
+
+//   return (
+//     <div>
+//       <h2>Live Stream Viewer</h2>
+//       <video ref={remoteVideoRef} autoPlay playsInline controls style={{ width: '100%', height: 'auto' }} />
+//     </div>
+//   );
+// };
+
+// export default LiveViewer;

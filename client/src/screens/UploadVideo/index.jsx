@@ -54,7 +54,6 @@ const UploadVideo = () => {
                 const url = UrlEndPoint.addVideo;
                 const res = await networkRequest({ url, method: 'post', data: formData });
                 if (res) {
-                    console.log('res: ', res);
                     navigate(`/video/${res._id}`);
                 }
             } catch (error) {

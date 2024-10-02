@@ -4,12 +4,14 @@ import { UrlEndPoint } from '../../http/apiConfig';
 import { Container } from '../../assets/css/home';
 import Card from '../../components/Card';
 
-const Live = () => {
+const Category = ({ Category }) => {
+    // console.log('Category: ', Category);
     const [videos, setVideos] = useState([])
 
     const fetchVideos = async () => {
         try {
-            const url = UrlEndPoint.activeLive
+            const url = `${Category === 'live' ? UrlEndPoint.activeLive : UrlEndPoint.Category}`
+            // console.log('url: ', url);
             const results = await networkRequest({ url })
             setVideos(results)
         } catch (error) {
@@ -17,19 +19,21 @@ const Live = () => {
         }
     };
 
-    
     useEffect(() => {
         fetchVideos()
-    }, [])
-    
+    }, [Category])
+
     return (
         <Container>
-            {videos?.map((video) => {
-            return(
-                <Card key={video?._id} video={video} />
-            )})}
+            {videos && videos.length > 0 ? (
+                videos?.map((video) => {
+                    return (
+                        <Card key={video?._id} video={video} />
+                    )
+                })
+            ) : (<p>{`No ${Category} Videos`}</p>)}
         </Container>
     )
 }
 
-export default Live
+export default Category

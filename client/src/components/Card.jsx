@@ -26,27 +26,27 @@ const Card = ({ type, video }) => {
   }, [video?.userId])
 
   return (
-    <Link to={video?.isActive === true ? `/live/${video?.streamId}` : `/video/${video?._id}`} style={{ textDecoration: "none" }}>
-      <Container type={type}>
+    <Container type={type}>
+      <Link to={video?.isActive === true ? `/live/${video?.streamId}` : `/video/${video?._id}`} style={{ textDecoration: "none" }}>
         <Image
           type={type}
           src={video?.imgUrl || video?.thumbnail}
         />
-        <Details type={type}>
-          <ChannelImage
-            type={type}
-            src={channel?.img}
-            alt=''
-          />
-          <Texts>
-            {video?.isActive === true && <span style={{ color: 'red' }}>Live</span>}
-            <Title>{video?.title}</Title>
-            <ChannelName>{channel?.name}</ChannelName>
-            <Info>{formatViews(video?.views)} views • {video.isActive === false ? `streamed ${format(video?.createdAt)}` : format(video?.createdAt)}</Info>
-          </Texts>
-        </Details>
-      </Container>
-    </Link>
+      </Link>
+      <Details type={type}>
+        <ChannelImage
+          type={type}
+          src={channel?.img}
+          alt='profile'
+        />
+        <Texts>
+          {video?.isActive === true && <span style={{ color: 'red' }}>Live</span>}
+          <Title>{video?.title}</Title>
+          <ChannelName>{channel?.name}</ChannelName>
+          <Info>{formatViews(video?.views)} views • {video.isActive === false ? `streamed ${format(video?.createdAt)}` : format(video?.createdAt)}</Info>
+        </Texts>
+      </Details>
+    </Container>
   )
 }
 

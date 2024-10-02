@@ -31,7 +31,6 @@ const Video = () => {
     try {
       const url = UrlEndPoint.findlive(id)
       const res = await networkRequest({ url })
-      console.log(' res: ', res);
       dispatch(fetchSuccess(res))
       // Fetch the  channel data from video response
       const userId = res.user;

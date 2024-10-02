@@ -25,4 +25,5 @@ export const UrlEndPoint = {
     activeLive: '/api/live/active',
     findlive: id => `/api/live/${id}`,
     views: (id) => `/api/video/view/${id}`,
+    refreshToken:"/api/auth/refreshtoken"
 }

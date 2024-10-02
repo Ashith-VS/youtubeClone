@@ -1,6 +1,7 @@
 import User from "../model/User.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import Token from "../model/RefreshToken.js"
 
 export const isSignUp = async (req, res) => {
     try {
@@ -27,16 +28,37 @@ export const isSignUp = async (req, res) => {
     }
 }
 
+// Helper function to generate tokens
+const generateTokens = (user) => {
+    // Generate access token (short-lived)
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    // Generate refresh token (longer-lived)
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '2d' });
+    return { accessToken, refreshToken };
+};
+
 
 export const isSignIn = async (req, res) => {
     try {
         // const { name, password } = req.body
         const user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        // Validate password
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid email/password" });
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-        res.json({ success: true, message: "User logged in successfully", token });
+        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+        // Generate tokens
+        const { accessToken, refreshToken } = generateTokens(user)
+
+        // // Generate access token (short-lived)
+        // const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+        // // Generate refresh token (longer-lived)
+        // const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '5d' })
+
+        // Save refresh token to the database
+        const token = new Token({ userId: user._id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
+        await token.save();
+
+        res.json({ success: true, message: "User logged in successfully", accessToken, refreshToken });
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
     }
@@ -47,8 +69,8 @@ export const isGoogleAuth = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email })
         if (user) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-            res.json({ success: true, message: "User logged in successfully", token });
+            const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+            res.json({ success: true, message: "User logged in successfully", accessToken });
         } else {
             const newUser = new User({
                 name: req.body.name,
@@ -57,8 +79,8 @@ export const isGoogleAuth = async (req, res) => {
                 fromGoogle: true
             })
             await newUser.save()
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-            res.json({ success: true, message: "User logged in successfully", token });
+            const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+            res.json({ success: true, message: "User logged in successfully", accessToken });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
@@ -75,3 +97,4 @@ export const isCurrentUser = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving user data' });
     }
 }
+

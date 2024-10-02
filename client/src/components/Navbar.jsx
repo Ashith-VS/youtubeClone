@@ -17,6 +17,7 @@ const Navbar = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const token = localStorage.getItem('auth_token');
+  // console.log('token: ', token);
 
   const fetchCurrentUser = async () => {
     try {
