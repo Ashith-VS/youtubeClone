@@ -11,15 +11,18 @@ dotenv.config()
 const app = express();
 const server = http.createServer(app);
 // const io = new Server(server);
-const io=new Server(server,{
+const io = new Server(server, {
     cors: {
         origin: "http://localhost:3000",
         methods: ["GET", "POST"],
+        credential: true,
     }
 })
-
 // Middleware
-app.use(cors())
+app.use(cors({
+    credentials: true,  // Ensure credentials like cookies are sent
+    origin: "http://localhost:3000",
+}))
 app.use(express.json());
 app.use(cookieParser())
 
@@ -38,7 +41,7 @@ app.use('/', router)
 
 // Socket.IO connection
 io.on('connection', (socket) => {
-    
+
     // User joins a specific room
     socket.on('join-room', (roomId) => {
         console.log(`${socket.id} joined room ${roomId}`);
@@ -47,13 +50,13 @@ io.on('connection', (socket) => {
 
     // WebRTC offer
     socket.on('offer', (offer, roomId) => {
-        console.log(`Received offer from ${ roomId} for room ${ offer}`);
+        console.log(`Received offer from ${roomId} for room ${offer}`);
         socket.to(roomId).emit('offer', offer);  // Send offer to the specific room
     });
 
     // WebRTC answer
     socket.on('answer', (answer, roomId) => {
-        console.log(`Received answer from ${ roomId} for room ${answer}`);
+        console.log(`Received answer from ${roomId} for room ${answer}`);
         socket.to(roomId).emit('answer', answer);  // Send answer to the specific room
     });
 
@@ -80,7 +83,7 @@ io.on('connection', (socket) => {
 // io.on('connection', (socket) => {
 //     console.log('socket: ', socket.id);
 //     socket.emit('join-room',socket.id)
-    
+
 //     // Handle disconnection
 //     socket.on('disconnect', () => {
 //         console.log('User disconnected', socket.id);

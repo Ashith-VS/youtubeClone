@@ -1,7 +1,6 @@
 import User from "../model/User.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import Token from "../model/RefreshToken.js"
 
 export const isSignUp = async (req, res) => {
     try {
@@ -31,7 +30,7 @@ export const isSignUp = async (req, res) => {
 // Helper function to generate tokens
 const generateTokens = (user) => {
     // Generate access token (short-lived)
-    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
     // Generate refresh token (longer-lived)
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '2d' });
     return { accessToken, refreshToken };
@@ -54,17 +53,15 @@ export const isSignIn = async (req, res) => {
         // // Generate refresh token (longer-lived)
         // const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '5d' })
 
-        // // Save refresh token to the database
-        // const token = new Token({ userId: user._id, token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-        // await token.save();
-
-  // Store refresh token in httpOnly cookie
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: true,  // Only in production with HTTPS
-    sameSite:'None',//cross Site cookie
-    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-});
+        // Store refresh token in httpOnly cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite:'Strict',
+            // secure: true,  // Only in production with HTTPS
+            secure:false,// Set to true in production
+            // sameSite:'None',//cross Site cookie
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        });
 
         res.json({ success: true, message: "User logged in successfully", accessToken });
     } catch (error) {
@@ -107,20 +104,21 @@ export const isCurrentUser = async (req, res) => {
 }
 
 export const refreshAccessToken = async (req, res) => {
-    const  cookies = req.cookies
-    if(!cookies?.refreshToken)return res.status(400).json({ message: "unAuthorized" });
+    const cookies = req.cookies
+    // console.log('cookies: ', cookies);
+    if (!cookies?.refreshToken) return res.status(400).json({ message: "unAuthorized" });
     const refreshToken = cookies.refreshToken
     // console.log('refreshToken: ', refreshToken);
     try {
         //   Verify token
-        jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async(err, user) => {
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, user) => {
             if (err) return res.status(403).json({ message: "Token is invalid || Forbidden " });
-        
+
             // Generate new access token
-            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
             res.json({ accessToken });
         })
-    }catch (err) {
+    } catch (err) {
         res.status(500).json({ message: err.message });
     }
 
@@ -128,9 +126,9 @@ export const refreshAccessToken = async (req, res) => {
 
 // Logout Route (to invalidate refresh tokens)
 export const logout = async (req, res) => {
-    const  cookies = req.cookies
-    // console.log('cookieslogout: ', cookies);
-    if(!cookies?.refreshToken)return res.status(400).json({ message: "unauthorized" });
-    res.clearCookie('refreshToken', {httpOnly: true,sameSite:'None',secure:true});
+    const cookies = req.cookies
+    console.log('cookieslogout: ', cookies);
+    if (!cookies?.refreshToken) return res.status(400).json({ message: "unauthorized" });
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Strict', secure: false });
     res.status(200).json({ message: "Cookies cleared" });
 }
