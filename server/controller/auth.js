@@ -56,9 +56,9 @@ export const isSignIn = async (req, res) => {
         // Store refresh token in httpOnly cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            sameSite:'Strict',
+            sameSite:'lax',
             // secure: true,  // Only in production with HTTPS
-            secure:false,// Set to true in production
+            secure: false,// Set to true in production
             // sameSite:'None',//cross Site cookie
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
         });
@@ -127,8 +127,8 @@ export const refreshAccessToken = async (req, res) => {
 // Logout Route (to invalidate refresh tokens)
 export const logout = async (req, res) => {
     const cookies = req.cookies
-    console.log('cookieslogout: ', cookies);
+    // console.log('cookieslogout: ', cookies);
     if (!cookies?.refreshToken) return res.status(400).json({ message: "unauthorized" });
-    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'Strict', secure: false });
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'lax', secure: false });
     res.status(200).json({ message: "Cookies cleared" });
 }

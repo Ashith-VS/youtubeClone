@@ -23,13 +23,17 @@ import {Container,Wrapper,Logo,Img,Item,Hr,Login,Button,Title} from "../assets/c
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { logout } from '../redux/slice/commonSlice';
 import { isEmpty } from 'lodash';
+import axios from 'axios';
+import { baseUrl, UrlEndPoint } from '../http/apiConfig';
 
 const Menu = ({ darkMode, setDarkMode }) => {
   const { currentUser } = useSelector(state => state.common)
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
+    const res = await axios.post(baseUrl + UrlEndPoint.logOut, {}, { withCredentials: true }) //for passing refreshtoken in cookies
+    // console.log('reslogout: ', res);
     localStorage.removeItem('auth_token');
     localStorage.clear()
     dispatch(logout());

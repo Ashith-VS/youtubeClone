@@ -1,7 +1,6 @@
 import axios from "axios";
 import { baseUrl, UrlEndPoint } from "./apiConfig";
-import { useNavigate } from "react-router-dom";
-const navigate=useNavigate
+
 axios.defaults.withCredentials = true
 
 let activeRequests = 0;
@@ -22,8 +21,9 @@ const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, 
             ...headers,
         },
         data,
-
     };
+
+    
 
     // console.log("config:", config);
 
@@ -43,10 +43,9 @@ const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, 
                 } else {
                     // Handle expired token || unauthorized access 
                     logout();
-                    navigate('/login')
                 }
-            }else{
-                reject(new Error(error.message|| 'An error occurred'));
+            } else {
+                reject(new Error(error.message || 'An error occurred'));
             }
         } finally {
             activeRequests--;
