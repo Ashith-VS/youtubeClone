@@ -30,7 +30,7 @@ export const isSignUp = async (req, res) => {
 // Helper function to generate tokens
 const generateTokens = (user) => {
     // Generate access token (short-lived)
-    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
     // Generate refresh token (longer-lived)
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '2d' });
     return { accessToken, refreshToken };
@@ -115,7 +115,7 @@ export const refreshAccessToken = async (req, res) => {
             if (err) return res.status(403).json({ message: "Token is invalid || Forbidden " });
 
             // Generate new access token
-            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15s' });
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
             res.json({ accessToken });
         })
     } catch (err) {

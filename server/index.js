@@ -79,34 +79,6 @@ io.on('connection', (socket) => {
         socket.leaveAll();  // Ensure the user leaves all joined rooms
     });
 });
-// // Socket.IO connection
-// io.on('connection', (socket) => {
-//     console.log('socket: ', socket.id);
-//     socket.emit('join-room',socket.id)
-
-//     // Handle disconnection
-//     socket.on('disconnect', () => {
-//         console.log('User disconnected', socket.id);
-//         socket.broadcast.emit('callEnded')
-//     });
-
-//     socket.on('callUser', (data) => {
-//       io.to(data.userToCall).emit('callUser', {signal:data.signalData ,from:data.from,name:data.name});
-//     })
-
-//     socket.on('answerCall', (data) => {
-//       io.to(data.to).emit('callAccepted', data.signal);
-//     })
-
-//        // Handle chat messages sent to a specific room
-//     socket.on('chat-message', (data) => {
-//         const { username, message, roomId } = data;
-//         console.log('username, message,: roomId: ', username, message, roomId);
-//         io.to(roomId).emit('chat-message', `${username}: ${message}`);  // Emit chat to the specific room
-//     });
-// });
-
-
 
 // Start the server
 server.listen(PORT, () => {
