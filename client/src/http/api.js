@@ -23,7 +23,7 @@ const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, 
         data,
     };
 
-    
+
 
     // console.log("config:", config);
 
@@ -33,16 +33,17 @@ const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, 
             resolve(response.data);
         } catch (error) {
             if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                const newAccessToken = await refreshAccessToken()
-                if (newAccessToken) {
-                    // console.log('newAccessToken: ', newAccessToken);
-                    localStorage.setItem('auth_token', newAccessToken)
-                    config.headers.Authorization = `Bearer ${newAccessToken}`;
-                    const retryResponse = await axios(config);  // Retry the request with new token
-                    resolve(retryResponse.data);
-                } else {
-                    // Handle expired token || unauthorized access 
-                    logout();
+                try {
+                    const newAccessToken = await refreshAccessToken()
+                    if (newAccessToken) {
+                        // console.log('newAccessToken: ', newAccessToken);
+                        localStorage.setItem('auth_token', newAccessToken)
+                        config.headers.Authorization = `Bearer ${newAccessToken}`;
+                        const retryResponse = await axios(config);  // Retry the request with new token
+                        resolve(retryResponse.data);
+                    }
+                } catch (error) {
+                    logout(); // Token refresh failed, perform logout
                 }
             } else {
                 reject(new Error(error.message || 'An error occurred'));

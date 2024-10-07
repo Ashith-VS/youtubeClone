@@ -33,19 +33,22 @@ const Card = ({ type, video }) => {
           src={video?.imgUrl || video?.thumbnail}
         />
       </Link>
+        <Link to={`profile/${channel?._id}`} style={{textDecoration:'none'}}>
       <Details type={type}>
         <ChannelImage
           type={type}
-          src={channel?.img}
+          src={channel?.avatar || channel?.thumbnail}
           alt='profile'
         />
         <Texts>
           {video?.isActive === true && <span style={{ color: 'red' }}>Live</span>}
           <Title>{video?.title}</Title>
           <ChannelName>{channel?.name}</ChannelName>
+         { console.log('channel: ', channel)};
           <Info>{formatViews(video?.views)} views • {video.isActive === false ? `streamed ${format(video?.createdAt)}` : format(video?.createdAt)}</Info>
         </Texts>
       </Details>
+        </Link>
     </Container>
   )
 }

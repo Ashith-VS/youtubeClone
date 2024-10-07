@@ -5,6 +5,7 @@ import SingleParticipantContainer from "./SingleParticipantContainer";
 
 const ParticipantsGridContainer = () => {
   const { participants } = useMeeting();
+  console.log('participants: ', participants);
 
   const participantIds = useMemo(
     () => [...participants.keys()],

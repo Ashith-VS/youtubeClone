@@ -5,13 +5,13 @@ import { Container } from '../../assets/css/home';
 import Card from '../../components/Card';
 
 const Category = ({ Category }) => {
-    // console.log('Category: ', Category);
+    console.log('Category: ', Category);
     const [videos, setVideos] = useState([])
 
     const fetchVideos = async () => {
         try {
-            const url = `${Category === 'live' ? UrlEndPoint.activeLive : UrlEndPoint.Category}`
-            // console.log('url: ', url);
+            const url = `${Category === 'live' ? UrlEndPoint.activeLive : UrlEndPoint.Category(Category)}`
+            console.log('url: ', url);
             const results = await networkRequest({ url })
             setVideos(results)
         } catch (error) {

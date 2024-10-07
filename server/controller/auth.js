@@ -121,7 +121,6 @@ export const refreshAccessToken = async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-
 }
 
 // Logout Route (to invalidate refresh tokens)

@@ -3,11 +3,11 @@ import { createNewRoom } from "./CreatingRoom";
 
 
 const WelcomeScreenContainer = ({ setAppData }) => {
+
   const [meetingId, setMeetingId] = useState("");
 
   const createClick = async () => {
     const meetingId = await createNewRoom();
-
     setAppData({ mode: "CONFERENCE", meetingId });
   };
   const hostClick = () => setAppData({ mode: "CONFERENCE", meetingId });

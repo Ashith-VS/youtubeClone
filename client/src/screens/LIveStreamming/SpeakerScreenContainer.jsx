@@ -4,15 +4,18 @@ import MediaControlsContainer from "./MediaControlsContainer";
 import ParticipantsGridContainer from "./ParticipantsGridContainer";
 
 import { authToken } from "./CreatingRoom";
+import { useSelector } from "react-redux";
 
 
 const SpeakerScreenContainer = ({ meetingId }) => {
+  const { currentUser } = useSelector(state => state.common)
+
   return (
     <MeetingProvider
       token={authToken}
       config={{
         meetingId,
-        name: "C.V. Raman",
+        name: currentUser?.name,
         micEnabled: true,
         webcamEnabled: true,
       }}

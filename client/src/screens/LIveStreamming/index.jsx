@@ -377,7 +377,6 @@ import WelcomeScreenContainer from "./WelcomeScreenContainer";
 
 const LiveStreaming = () => {
   const [appData, setAppData] = useState({ meetingId: null, mode: null });
-  console.log('setAppData: ', setAppData);
 
   return (
     appData.meetingId ? (

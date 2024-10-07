@@ -2,8 +2,7 @@ import { useMeeting, Constants } from "@videosdk.live/react-sdk";
 import React, { useMemo } from "react";
 
 const MediaControlsContainer = () => {
-  const { toggleMic, toggleWebcam, startHls, stopHls, hlsState, meetingId } =
-    useMeeting();
+  const { toggleMic, toggleWebcam, startHls, stopHls, hlsState, meetingId } = useMeeting();
 
   const { isHlsStarted, isHlsStopped, isHlsPlayable } = useMemo(
     () => ({

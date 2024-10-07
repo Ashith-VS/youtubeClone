@@ -7,7 +7,7 @@ import ReplyOutlinedIcon from "@mui/icons-material/ReplyOutlined";
 import AddTaskOutlinedIcon from "@mui/icons-material/AddTaskOutlined";
 import Comments from '../../components/Comments';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
 import { format } from 'timeago.js';
@@ -22,7 +22,7 @@ import { formatViews } from '../../constants/common';
 const Video = () => {
   const { currentUser } = useSelector(state => state.common)
   const { currentVideo } = useSelector(state => state.video)
-
+  const [hasRecordedHistory, setHasRecordedHistory] = useState(false);
   const dispatch = useDispatch();
   const { id } = useParams()
   const [channel, setChannel] = useState({})
@@ -53,6 +53,20 @@ const Video = () => {
     }
   }
 
+  const recordWatchHistory = async () => {
+    if (!isEmpty(currentUser)) {
+      try {
+        const url = UrlEndPoint.addHistory; // Adjust the endpoint to match your server's route
+        console.log('url: ', url);
+       await networkRequest({ url, method: 'post', data: { userId: currentUser._id, videoId: id } });
+        
+      } catch (error) {
+        console.error('Error recording watch history:', error);
+      }
+    }
+  };
+
+
   const fetchData = async () => {
     try {
       const videoUrl = UrlEndPoint.video(id);
@@ -75,7 +89,16 @@ const Video = () => {
     fetchData();
     addViews();
     fetchLiveVideo(); // Fetch live video data when video id changes
+    setHasRecordedHistory(false); // Reset history recording for the new video
   }, [id])
+
+  useEffect(() => {
+    if (!hasRecordedHistory && currentVideo?._id) {
+      recordWatchHistory(); // Record watch history
+      setHasRecordedHistory(true); // Mark as recorded
+  }
+  }, [currentVideo]);
+
 
 
   const handleLikes = async () => {
@@ -149,16 +172,18 @@ const Video = () => {
         </Details>
         <Hr />
         <Channel>
-          <ChannelInfo>
-            <Image src={channel?.avatar} />
-            <ChannelDetail>
-              <ChannelName>{channel?.name}</ChannelName>
-              <ChannelCounter>{channel?.subscribers} subscribers</ChannelCounter>
-              <Description>
-                {currentVideo?.description}
-              </Description>
-            </ChannelDetail>
-          </ChannelInfo>
+          <Link to={`/profile/${channel?._id}`} style={{ textDecoration: 'none' }}>
+            <ChannelInfo>
+              <Image src={channel?.avatar} />
+              <ChannelDetail>
+                <ChannelName>{channel?.name}</ChannelName>
+                <ChannelCounter>{channel?.subscribers} subscribers</ChannelCounter>
+                <Description>
+                  {currentVideo?.description}
+                </Description>
+              </ChannelDetail>
+            </ChannelInfo>
+          </Link>
           <Subscribe onClick={handleSubscribe}>{currentUser?.subscribedChannels?.includes(channel?._id) ? "SUBSCRIBED" : "SUBSCRIBE"}</Subscribe>
         </Channel>
         <Hr />

@@ -1,6 +1,6 @@
 import React, { Suspense, useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { GetStreaming, Home, Category, LiveStreamming, Profile, Search, SignIn, SignUp, UploadVideo, Video } from '../screens';
+import { GetStreaming, Home, Category, LiveStreamming, Profile, Search, SignIn, SignUp, UploadVideo, Video, History } from '../screens';
 import styled, { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from '../utils/Theme';
 import Navbar from '../components/Navbar';
@@ -42,11 +42,13 @@ const Router = () => {
                 <Route path="/livelist" element={<Category Category='live' />} />
                 <Route path="/music" element={<Category Category='music'/>} />
                 <Route path="/sports" element={<Category Category='sports'/>} />
-                <Route path="/gaming" element={<Category Category='game'/>} />
+                <Route path="/game" element={<Category Category='game'/>} />
                 <Route path="/movies" element={<Category Category='movies'/>} />
                 <Route path="/news" element={<Category Category='news'/>} />
                 <Route path="/live/:id" element={<GetStreaming />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/history" element={<History/>} />
               </Routes>
               </Suspense>
             </Wrapper>

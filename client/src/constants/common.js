@@ -1,9 +1,3 @@
-import { io } from "socket.io-client";
-import { baseUrl } from "../http/apiConfig";
-
-export const socket = io.connect(baseUrl)
-
-
 export const formatViews = (views) => {
     if (views >= 1000000) {
         return (views / 1000000).toFixed(1) + 'M';  // Show in millions
