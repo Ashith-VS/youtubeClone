@@ -44,7 +44,6 @@ const Card = ({ type, video }) => {
           {video?.isActive === true && <span style={{ color: 'red' }}>Live</span>}
           <Title>{video?.title}</Title>
           <ChannelName>{channel?.name}</ChannelName>
-         { console.log('channel: ', channel)};
           <Info>{formatViews(video?.views)} views • {video.isActive === false ? `streamed ${format(video?.createdAt)}` : format(video?.createdAt)}</Info>
         </Texts>
       </Details>

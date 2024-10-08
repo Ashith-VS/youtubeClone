@@ -57,7 +57,6 @@ const Video = () => {
     if (!isEmpty(currentUser)) {
       try {
         const url = UrlEndPoint.addHistory; // Adjust the endpoint to match your server's route
-        console.log('url: ', url);
        await networkRequest({ url, method: 'post', data: { userId: currentUser._id, videoId: id } });
         
       } catch (error) {

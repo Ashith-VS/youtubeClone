@@ -370,25 +370,34 @@
 
 // export default LiveStreaming;
 
-import { useState } from "react";
-import SpeakerScreenContainer from "./SpeakerScreenContainer";
-import ViewerScreenContainer from "./ViewerScreenContainer";
-import WelcomeScreenContainer from "./WelcomeScreenContainer";
+// import { useState } from "react";
+// import SpeakerScreenContainer from "./SpeakerScreenContainer";
+// import ViewerScreenContainer from "./ViewerScreenContainer";
+// import WelcomeScreenContainer from "./WelcomeScreenContainer";
 
-const LiveStreaming = () => {
-  const [appData, setAppData] = useState({ meetingId: null, mode: null });
+// const LiveStreaming = () => {
+//   const [appData, setAppData] = useState({ meetingId: null, mode: null });
 
+//   return (
+//     appData.meetingId ? (
+//       appData.mode === "CONFERENCE" ? (
+//         <SpeakerScreenContainer meetingId={appData.meetingId} />
+//       ) : (
+//         <ViewerScreenContainer meetingId={appData.meetingId} />
+//       )
+//     ) : (
+//       <WelcomeScreenContainer setAppData={setAppData} />
+//     )
+//   )
+// }
+
+// export default LiveStreaming
+import React from 'react'
+
+const LiveStreamming = () => {
   return (
-    appData.meetingId ? (
-      appData.mode === "CONFERENCE" ? (
-        <SpeakerScreenContainer meetingId={appData.meetingId} />
-      ) : (
-        <ViewerScreenContainer meetingId={appData.meetingId} />
-      )
-    ) : (
-      <WelcomeScreenContainer setAppData={setAppData} />
-    )
+    <div>LiveStreamming</div>
   )
 }
 
-export default LiveStreaming
+export default LiveStreamming
