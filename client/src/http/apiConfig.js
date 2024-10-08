@@ -1,4 +1,5 @@
-export const baseUrl = 'http://172.16.221.226:4000'
+export const baseUrl = 'http://localhost:4000'
+// export const baseUrl = 'https://youtubeclone-3rlb.onrender.com' 
 
 export const UrlEndPoint = {
     random: '/api/video/random',
@@ -24,4 +25,13 @@ export const UrlEndPoint = {
     activeLive: '/api/live/active',
     findlive: id => `/api/live/${id}`,
     views: (id) => `/api/video/view/${id}`,
+    refreshToken: "/api/auth/refreshToken",
+    logOut: "/api/auth/logout",
+    userVideo: id => `/api/user/video/${id}`,
+    userLive: (id) => `/api/user/live/${id}`,
+    subscribedChannels: id => `/api/user/channels/${id}`,
+    profileUpdate: id => `/api/user/${id}`,
+    addHistory: '/api/user/addHistory',
+    userHistory: `/api/user/history`,
+    Category:(category)=>`/api/video/${category}`
 }

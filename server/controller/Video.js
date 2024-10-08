@@ -115,3 +115,13 @@ export const getBySearch = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+export const getByCategory = async (req,res) => {
+    const {category} = req.params
+    try {
+        const videos = await Video.find({ tags: { $in: [category] } }).limit(30)
+        res.status(200).json(videos)
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}

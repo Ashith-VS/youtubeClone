@@ -1,11 +1,14 @@
 import axios from "axios";
-import { baseUrl } from "./apiConfig";
+import { baseUrl, UrlEndPoint } from "./apiConfig";
+
+axios.defaults.withCredentials = true
 
 let activeRequests = 0;
 
 const networkRequest = async ({ url, method = 'GET', data = {}, headers = {} }, dispatch) => {
-activeRequests++;
-// dispatch(showLoader(true))
+    activeRequests++;
+    // dispatch(showLoader(true))
+    const accessToken = localStorage.getItem('auth_token');
 
     const config = {
         url: baseUrl + url,
@@ -14,48 +17,69 @@ activeRequests++;
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Accept-Language": "en",
-            Authorization: localStorage.getItem('auth_token') ? `Bearer ${localStorage.getItem('auth_token')}` : null,
+            Authorization: accessToken ? `Bearer ${accessToken}` : null,
             ...headers,
         },
         data,
     };
 
+
+
     // console.log("config:", config);
 
-return new Promise(async(resolve, reject) => {
-    try {
-        const response = await axios(config);
-        resolve(response.data);
-    } catch (error) {
-        let errorMessage = 'An error occurred';
-        if (error.response) {
-            errorMessage = error.response.data.message || errorMessage;
-            if (error.response.status === 401 || error.response.status === 403) {
-                // Handle unauthorized access (e.g., logout user)
-                logout();
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios(config);
+            resolve(response.data);
+        } catch (error) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                try {
+                    const newAccessToken = await refreshAccessToken()
+                    if (newAccessToken) {
+                        // console.log('newAccessToken: ', newAccessToken);
+                        localStorage.setItem('auth_token', newAccessToken)
+                        config.headers.Authorization = `Bearer ${newAccessToken}`;
+                        const retryResponse = await axios(config);  // Retry the request with new token
+                        resolve(retryResponse.data);
+                    }
+                } catch (error) {
+                    logout(); // Token refresh failed, perform logout
+                }
+            } else {
+                reject(new Error(error.message || 'An error occurred'));
             }
-        } else if (error.request) {
-            errorMessage = 'No response received from server';
+        } finally {
+            activeRequests--;
+            // console.log(`Request finished. Active requests: ${activeRequests}`);
+            if (activeRequests === 0) {
+                // dispatch(showLoader(false));
+            }
         }
-        else {
-            errorMessage = error.message;
-        }
-        console.error(errorMessage); 
-        reject(new Error(errorMessage));
-    } finally {
-        activeRequests--;
-        // console.log(`Request finished. Active requests: ${activeRequests}`);
-        if (activeRequests === 0) {
-            // dispatch(showLoader(false));
-        }
-    }
-})
+    })
 }
 
-const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.clear();
-    window.location.reload();
+const refreshAccessToken = async () => {
+    try {
+        // Call your backend to refresh the access token
+        const response = await axios.get(baseUrl + UrlEndPoint.refreshToken, { withCredentials: true })
+        return response.data.accessToken;
+    } catch (error) {
+        console.error('Refresh token expired or invalid', error);
+        throw new Error('Failed to refresh access token');
+    }
+
+};
+
+const logout = async () => {
+    try {
+        const res = await axios.post(baseUrl + UrlEndPoint.logOut, {}, { withCredentials: true })
+        console.log('reslogout: ', res);
+        localStorage.removeItem('auth_token');
+        // localStorage.clear();
+        window.location.reload();
+    } catch (error) {
+        console.error(error)
+    }
 };
 
 export default networkRequest;

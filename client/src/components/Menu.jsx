@@ -1,21 +1,7 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import logoicon from '../assets/images/icons/logos.jpg'
-import HomeIcon from '@mui/icons-material/Home';
-import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
-import SubscriptionsOutlinedIcon from "@mui/icons-material/SubscriptionsOutlined";
-import VideoLibraryOutlinedIcon from "@mui/icons-material/VideoLibraryOutlined";
-import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
-import LibraryMusicOutlinedIcon from "@mui/icons-material/LibraryMusicOutlined";
-import SportsEsportsOutlinedIcon from "@mui/icons-material/SportsEsportsOutlined";
-import SportsBasketballOutlinedIcon from "@mui/icons-material/SportsBasketballOutlined";
-import MovieOutlinedIcon from "@mui/icons-material/MovieOutlined";
-import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import LiveTvOutlinedIcon from "@mui/icons-material/LiveTvOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,13 +9,18 @@ import {Container,Wrapper,Logo,Img,Item,Hr,Login,Button,Title} from "../assets/c
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { logout } from '../redux/slice/commonSlice';
 import { isEmpty } from 'lodash';
+import axios from 'axios';
+import { baseUrl, UrlEndPoint } from '../http/apiConfig';
+import { categoryItems, menuItems, settingsItems } from '../constants/Icon_data/menuItem';
 
 const Menu = ({ darkMode, setDarkMode }) => {
   const { currentUser } = useSelector(state => state.common)
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
+    const res = await axios.post(baseUrl + UrlEndPoint.logOut, {}, { withCredentials: true }) //for passing refreshtoken in cookies
+    // console.log('reslogout: ', res);
     localStorage.removeItem('auth_token');
     localStorage.clear()
     dispatch(logout());
@@ -45,64 +36,43 @@ const Menu = ({ darkMode, setDarkMode }) => {
             VideoStreamer
           </Logo>
         </Link>
-        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <Item>
-            <HomeIcon />
-            Home
-          </Item>
-        </Link>
-        <Link to="trends" style={{ textDecoration: "none", color: "inherit" }}>
-          <Item>
-            <ExploreOutlinedIcon />
-            Explore
-          </Item>
-        </Link>
-        {!isEmpty(currentUser)&&
-        <Link to="subscriptions" style={{ textDecoration: "none", color: "inherit" }}>
-          <Item>
-            <SubscriptionsOutlinedIcon />
-            Subscriptions
-          </Item>
-        </Link>}
-        <Hr />
-        <Item>
-          <VideoLibraryOutlinedIcon />
-          Library
-        </Item>
-        <Item>
-          <HistoryOutlinedIcon />
-          History
-        </Item>
+        
+        {/* Render menu items dynamically */}
+        {menuItems?.map(({ path, icon, label, protected: isProtected }) => {
+          // If the item is protected, check if the user is logged in
+          if (isProtected && isEmpty(currentUser)) return null;
+
+          return (
+            <Link to={path} key={label} style={{ textDecoration: "none", color: "inherit" }}>
+              <Item>
+                {icon}
+                {label}
+              </Item>
+            </Link>
+          );
+        })}
+       
+        
         <Hr />
         <Title>BEST OF VideoStreamer</Title>
-        <Item>
-          <LibraryMusicOutlinedIcon />
-          Music
-        </Item>
-        <Item>
-          <SportsBasketballOutlinedIcon />
-          Sports
-        </Item>
-        <Item>
-          <SportsEsportsOutlinedIcon />
-          Gaming
-        </Item>
-        <Item>
-          <MovieOutlinedIcon />
-          Movies
-        </Item>
-        <Item>
-          <ArticleOutlinedIcon />
-          News
-        </Item>
-        {!isEmpty(currentUser)&&<Item onClick={() => { navigate('/livelist') }}>
-          <LiveTvOutlinedIcon />
-          Live
-        </Item>}
-        <Hr />
+        {categoryItems?.map(({ path, icon, label, protected: isProtected }) => {
+          // If the item is protected, check if the user is logged in
+          if (isProtected && isEmpty(currentUser)) return null;
+
+          return (
+            <Link to={path} key={label} style={{ textDecoration: "none", color: "inherit" }}>
+              <Item>
+                {icon}
+                {label}
+              </Item>
+            </Link>
+          );
+        })}
+        <hr />
+        {/* Sign In/Out Logic */}
         {!isEmpty(currentUser) ? (
           <>
-            <Item onClick={()=>navigate('/profile')}>
+            <Item onClick={() => navigate('/profile')}>
               <AccountCircleIcon />
               Profile
             </Item>
@@ -123,18 +93,19 @@ const Menu = ({ darkMode, setDarkMode }) => {
           </Login>
         )}
         <Hr />
-        <Item>
-          <SettingsOutlinedIcon />
-          Settings
-        </Item>
-        <Item>
-          <FlagOutlinedIcon />
-          Report
-        </Item>
-        <Item>
-          <HelpOutlineOutlinedIcon />
-          Help
-        </Item>
+         {settingsItems.map(({ path, icon, label, protected: isProtected }) => {
+          // If the item is protected, check if the user is logged in
+          if (isProtected && isEmpty(currentUser)) return null;
+          return (
+            <Link to={path} key={label} style={{ textDecoration: "none", color: "inherit" }}>
+              <Item>
+                {icon}
+                {label}
+              </Item>
+            </Link>
+          );
+        })}
+        
         <Item onClick={() => setDarkMode(!darkMode)}>
           <SettingsBrightnessOutlinedIcon />
           {darkMode ? "Light" : "Dark"} Mode

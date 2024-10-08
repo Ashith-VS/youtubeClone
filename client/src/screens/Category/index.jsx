@@ -3,43 +3,35 @@ import networkRequest from '../../http/api';
 import { UrlEndPoint } from '../../http/apiConfig';
 import { Container } from '../../assets/css/home';
 import Card from '../../components/Card';
-import { useParams } from 'react-router-dom';
 
-const Live = () => {
-    const { id } = useParams()
+const Category = ({ Category }) => {
     const [videos, setVideos] = useState([])
 
     const fetchVideos = async () => {
         try {
-            const url = UrlEndPoint.activeLive
+            const url = `${Category === 'live' ? UrlEndPoint.activeLive : UrlEndPoint.Category(Category)}`
             const results = await networkRequest({ url })
             setVideos(results)
         } catch (error) {
             console.error('Error fetching videos:', error);
         }
     };
-    const fetchLiveVideo = async () => {
-        try {
-          const url = UrlEndPoint.findlive(id)
-          const res = await networkRequest({ url })
-       
-        } catch (error) {
-          console.error(error);
-        }
-      }
-    
 
     useEffect(() => {
         fetchVideos()
-    }, [])
+    }, [Category])
 
     return (
         <Container>
-            {videos?.map((video) => (
-                <Card key={video?._id} video={video} />
-            ))}
+            {videos && videos.length > 0 ? (
+                videos?.map((video) => {
+                    return (
+                        <Card key={video?._id} video={video} />
+                    )
+                })
+            ) : (<p>{`No ${Category} Videos`}</p>)}
         </Container>
     )
 }
 
-export default Live
+export default Category

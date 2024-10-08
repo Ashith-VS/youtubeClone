@@ -28,7 +28,8 @@ const UserSchema=new mongoose.Schema({
     fromGoogle:{
         type:Boolean,
         default:false
-    }
+    },
+    bio:{type:String}
 },
 {timestamps:true})
 

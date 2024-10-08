@@ -3,13 +3,15 @@ import LiveStream from "../model/liveStream.js";
 // Start a new live stream
 export const startLiveStream = async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description,streamId,videoUrl,thumbnail } = req.body;
         const newStream = new LiveStream({
+            streamId,  // unique identifier for the live stream
             title,
             description,
             user: req.id,
             isActive: true,
-            videoUrl: '',  // will store the video URL for later use
+            thumbnail,
+            videoUrl,  // will store the video URL for later use
         });
         await newStream.save();
         res.status(201).json(newStream);
@@ -21,8 +23,8 @@ export const startLiveStream = async (req, res) => {
 export const stopLiveStream = async (req, res) => {
     try {
         const { streamId, videoUrl } = req.body;
-        console.log(' req.bodystop: ', req.body);
-        const liveStream = await LiveStream.findById(streamId);
+        // Find the live stream by ID
+        const liveStream = await LiveStream.findOne({ streamId });
         if (!liveStream) {
             return res.status(404).json({ message: 'Live stream not found' });
         }
@@ -34,7 +36,6 @@ export const stopLiveStream = async (req, res) => {
         await liveStream.save();
         res.status(200).json({ status: 'ok', message: 'Live stream stopped' });
     } catch (error) {
-        console.log('error: ', error);
         res.status(500).json({ message: 'Error stopping live stream', error });
     }
 };
@@ -58,7 +59,6 @@ export const getAllLiveStreams = async (req, res) => {
         res.status(500).json({ message: 'Error fetching live streams', error });
     }
 };
-
 
 
 // Get a specific live stream by its ID

@@ -34,13 +34,13 @@ const Comments = ({ videoId }) => {
     fetchComments();
   }, [videoId]);
 
+  const data = { videoId, desc }
   const handleAddComment = async () => {
+    setDesc('')
     if (!isEmpty(currentUser)) {
-      const data = { videoId, desc }
       const url = UrlEndPoint.addComment
       try {
         await networkRequest({ url, method: 'post', data });
-        setDesc('')
         fetchComments()
       } catch (error) {
         console.error(error);
@@ -57,7 +57,7 @@ const Comments = ({ videoId }) => {
       <NewComment>
         <Avatar src={currentUser?.avatar} />
         <Input placeholder="Add a comment..." onChange={(e) => setDesc(e.target.value)} name='desc' value={desc} />
-        <SendIcon onClick={handleAddComment} />
+        {!isEmpty(desc) && <SendIcon onClick={handleAddComment} />}
       </NewComment>
       <Suspense fallback={<div>Loading ....</div>}>
         {comments.map((comment) => {

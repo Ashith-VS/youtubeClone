@@ -18,8 +18,9 @@ const SignIn = lazy(() => import('./Auth/SignIn'))
 const SignUp = lazy(() => import('./Auth/SignUp'))
 const Profile = lazy(() => import('./Profile'))
 const GetStreaming = lazy(() => import('./GetStreaming'))
-const Live = lazy(() => import('./Live'))
-
+const Category = lazy(() => import('./Category'))
+const History = lazy(() => import('./HistoryPage'))
+const NotFound = lazy(() => import('./NotFound'))
 export {
     Home,
     Video,
@@ -30,5 +31,7 @@ export {
     SignUp,
     Profile,
     GetStreaming,
-    Live
+    Category,
+    History,
+    NotFound
 }

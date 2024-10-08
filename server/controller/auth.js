@@ -27,16 +27,43 @@ export const isSignUp = async (req, res) => {
     }
 }
 
+// Helper function to generate tokens
+const generateTokens = (user) => {
+    // Generate access token (short-lived)
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    // Generate refresh token (longer-lived)
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '2d' });
+    return { accessToken, refreshToken };
+};
+
 
 export const isSignIn = async (req, res) => {
     try {
         // const { name, password } = req.body
         const user = await User.findOne({ email: req.body.email });
         if (!user) return res.status(404).json({ success: false, message: "User not found" });
+        // Validate password
         const isMatch = await bcrypt.compare(req.body.password, user.password);
-        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid email/password" });
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-        res.json({ success: true, message: "User logged in successfully", token });
+        if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+        // Generate tokens
+        const { accessToken, refreshToken } = generateTokens(user)
+
+        // // Generate access token (short-lived)
+        // const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+        // // Generate refresh token (longer-lived)
+        // const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '5d' })
+
+        // Store refresh token in httpOnly cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite:'lax',
+            // secure: true,  // Only in production with HTTPS
+            secure: false,// Set to true in production
+            // sameSite:'None',//cross Site cookie
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+        });
+
+        res.json({ success: true, message: "User logged in successfully", accessToken });
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
     }
@@ -47,8 +74,8 @@ export const isGoogleAuth = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email })
         if (user) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-            res.json({ success: true, message: "User logged in successfully", token });
+            const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+            res.json({ success: true, message: "User logged in successfully", accessToken });
         } else {
             const newUser = new User({
                 name: req.body.name,
@@ -57,8 +84,8 @@ export const isGoogleAuth = async (req, res) => {
                 fromGoogle: true
             })
             await newUser.save()
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2h' })
-            res.json({ success: true, message: "User logged in successfully", token });
+            const accessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+            res.json({ success: true, message: "User logged in successfully", accessToken });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "An error occurred while logging in the user", error: error.message });
@@ -74,4 +101,33 @@ export const isCurrentUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving user data' });
     }
+}
+
+export const refreshAccessToken = async (req, res) => {
+    const cookies = req.cookies
+    // console.log('cookies: ', cookies);
+    if (!cookies?.refreshToken) return res.status(400).json({ message: "unAuthorized" });
+    const refreshToken = cookies.refreshToken
+    // console.log('refreshToken: ', refreshToken);
+    try {
+        //   Verify token
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN_SECRET, async (err, user) => {
+            if (err) return res.status(403).json({ message: "Token is invalid || Forbidden " });
+
+            // Generate new access token
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            res.json({ accessToken });
+        })
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
+
+// Logout Route (to invalidate refresh tokens)
+export const logout = async (req, res) => {
+    const cookies = req.cookies
+    // console.log('cookieslogout: ', cookies);
+    if (!cookies?.refreshToken) return res.status(400).json({ message: "unauthorized" });
+    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'lax', secure: false });
+    res.status(200).json({ message: "Cookies cleared" });
 }
