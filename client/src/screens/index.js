@@ -20,6 +20,7 @@ const Profile = lazy(() => import('./Profile'))
 const GetStreaming = lazy(() => import('./GetStreaming'))
 const Category = lazy(() => import('./Category'))
 const History = lazy(() => import('./HistoryPage'))
+const NotFound = lazy(() => import('./NotFound'))
 export {
     Home,
     Video,
@@ -31,5 +32,6 @@ export {
     Profile,
     GetStreaming,
     Category,
-    History
+    History,
+    NotFound
 }

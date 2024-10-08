@@ -1,6 +1,6 @@
 import React, { Suspense, useState } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { GetStreaming, Home, Category, LiveStreamming, Profile, Search, SignIn, SignUp, UploadVideo, Video, History } from '../screens';
+import { GetStreaming, Home, Category, LiveStreamming, Profile, Search, SignIn, SignUp, UploadVideo, Video, History, NotFound } from '../screens';
 import styled, { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from '../utils/Theme';
 import Navbar from '../components/Navbar';
@@ -49,6 +49,7 @@ const Router = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/:id" element={<Profile />} />
                 <Route path="/history" element={<History/>} />
+                <Route path="*" element={<NotFound/>} />
               </Routes>
               </Suspense>
             </Wrapper>
