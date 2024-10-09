@@ -10,8 +10,8 @@ import { storage } from '../../services/firebase';
 import { currentUserAuth } from '../../redux/slice/commonSlice';
 
 const ProfilePage = () => {
-  
-  const {id}=useParams()
+
+  const { id } = useParams()
   const { currentUser } = useSelector(state => state.common)
   const userId = id ? id : currentUser?._id;
   const dispatch = useDispatch();
@@ -27,16 +27,16 @@ const ProfilePage = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
-  
+
 
   const handleEditClick = async () => {
     setIsEditing(!isEditing);
     try {
       const url = UrlEndPoint.profileUpdate(currentUser._id)
       const res = await networkRequest({ url, method: 'put', data: profileData });
-    if(res){
-dispatch(currentUserAuth(res))
-    }
+      if (res) {
+        dispatch(currentUserAuth(res))
+      }
     } catch (error) {
       console.error(error)
     }
@@ -113,27 +113,25 @@ dispatch(currentUserAuth(res))
     }
   }
 
- 
+
   //  Fetch data when the profile page is opened or the id changes
   useEffect(() => {
-     // Check if viewing own profile or other user's profile
+    // Check if viewing own profile or other user's profile
     fetchProfileData(userId);
     fetchUserVideos(userId);
   }, [id]);
 
 
-// Function to fetch profile data of the user (either current user or other user)
-const fetchProfileData = async (userId) => {
-  try {
-    const url = UrlEndPoint.user(userId);  // Define an endpoint to fetch user profile by id
-    console.log('url: ', url);
-    const res = await networkRequest({ url });
-    console.log('res: ', res);
-    setProfileData(res);  // Save the fetched profile data
-  } catch (error) {
-    console.error(error);
-  }
-};
+  // Function to fetch profile data of the user (either current user or other user)
+  const fetchProfileData = async (userId) => {
+    try {
+      const url = UrlEndPoint.user(userId);  // Define an endpoint to fetch user profile by id
+      const res = await networkRequest({ url });
+      setProfileData(res);  // Save the fetched profile data
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
 
   return (
@@ -157,11 +155,11 @@ const fetchProfileData = async (userId) => {
         ) : (
           <Username>{profileData.name ? profileData.name : currentUser?.name}</Username>
         )}
-        <Subscribers>{profileData.subscribers ? profileData.subscribers :currentUser?.subscribers} subscribers</Subscribers>
-        {currentUser?._id === userId&&
-        <EditButton onClick={handleEditClick}>
-          {isEditing ? 'Save' : 'Edit Profile'}
-        </EditButton>}
+        <Subscribers>{profileData.subscribers ? profileData.subscribers : currentUser?.subscribers} subscribers</Subscribers>
+        {currentUser?._id === userId &&
+          <EditButton onClick={handleEditClick}>
+            {isEditing ? 'Save' : 'Edit Profile'}
+          </EditButton>}
       </ProfileHeader>
       <BioSection>
         {isEditing ? (
@@ -233,13 +231,12 @@ const fetchProfileData = async (userId) => {
           {subscribedChannels.length > 0 ? (
             <div>
               {subscribedChannels.map((channel) => (
-                <Link to={`/profile/${channel._id}`} style={{textDecoration:'none'}}key={channel._id}>
-                <div  style={{ display: "flex" }}>
-                   
-                  <img src={channel.avatar} alt={channel.name} width="50" />
-                  <h3>{channel.name}</h3>
-                </div>
-                  </Link>
+                <Link to={`/profile/${channel._id}`} style={{ textDecoration: 'none' }} key={channel._id}>
+                  <div style={{ display: "flex" }}>
+                    <img src={channel.avatar} alt={channel.name} width="50" />
+                    <h3>{channel.name}</h3>
+                  </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -252,5 +249,3 @@ const fetchProfileData = async (userId) => {
 };
 
 export default ProfilePage;
-
-
