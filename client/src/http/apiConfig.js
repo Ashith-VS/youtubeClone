@@ -1,5 +1,5 @@
-// export const baseUrl = 'http://localhost:4000'
-export const baseUrl = 'https://youtubeclone-1-vtyy.onrender.com' 
+export const baseUrl = 'http://localhost:4000'
+// export const baseUrl = 'https://youtubeclone-1-vtyy.onrender.com' 
 
 export const UrlEndPoint = {
     random: '/api/video/random',
@@ -33,5 +33,5 @@ export const UrlEndPoint = {
     profileUpdate: id => `/api/user/${id}`,
     addHistory: '/api/user/addHistory',
     userHistory: `/api/user/history`,
-    Category:(category)=>`/api/video/${category}`
+    Category: (category) => `/api/video/${category}`
 }

@@ -5,7 +5,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useDispatch, useSelector } from 'react-redux';
-import {Container,Wrapper,Logo,Img,Item,Hr,Login,Button,Title} from "../assets/css/menu"
+import { Container, Wrapper, Logo, Img, Item, Hr, Login, Button, Title } from "../assets/css/menu"
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { logout } from '../redux/slice/commonSlice';
 import { isEmpty } from 'lodash';
@@ -18,7 +18,7 @@ const Menu = ({ darkMode, setDarkMode }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     const res = await axios.post(baseUrl + UrlEndPoint.logOut, {}, { withCredentials: true }) //for passing refreshtoken in cookies
     // console.log('reslogout: ', res);
     localStorage.removeItem('auth_token');
@@ -36,7 +36,7 @@ const Menu = ({ darkMode, setDarkMode }) => {
             VideoStreamer
           </Logo>
         </Link>
-        
+
         {/* Render menu items dynamically */}
         {menuItems?.map(({ path, icon, label, protected: isProtected }) => {
           // If the item is protected, check if the user is logged in
@@ -51,8 +51,8 @@ const Menu = ({ darkMode, setDarkMode }) => {
             </Link>
           );
         })}
-       
-        
+
+
         <Hr />
         <Title>BEST OF VideoStreamer</Title>
         {categoryItems?.map(({ path, icon, label, protected: isProtected }) => {
@@ -93,7 +93,7 @@ const Menu = ({ darkMode, setDarkMode }) => {
           </Login>
         )}
         <Hr />
-         {settingsItems.map(({ path, icon, label, protected: isProtected }) => {
+        {/* {settingsItems.map(({ path, icon, label, protected: isProtected }) => {
           // If the item is protected, check if the user is logged in
           if (isProtected && isEmpty(currentUser)) return null;
           return (
@@ -104,8 +104,8 @@ const Menu = ({ darkMode, setDarkMode }) => {
               </Item>
             </Link>
           );
-        })}
-        
+        })} */}
+
         <Item onClick={() => setDarkMode(!darkMode)}>
           <SettingsBrightnessOutlinedIcon />
           {darkMode ? "Light" : "Dark"} Mode

@@ -27,6 +27,7 @@ const Search = styled.div`
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 15px;
+  cursor: pointer;
 `;
 
 const Input = styled.input`
