@@ -14,17 +14,16 @@ const server = http.createServer(app);
 // Set up socket.io with CORS
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000"], // Frontend origin
+        origin: ["http://localhost:3000", "https://videosstreamerss.netlify.app"], // Frontend origin
         methods: ["GET", "POST"],
         credentials: true  // Allow credentials (cookies, headers, etc.)
     }
 });
 
-
 // Middleware
 app.use(cors({
     credentials: true,  // Ensure credentials like cookies are sent
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://videosstreamerss.netlify.app"],
 }))
 app.use(express.json());
 app.use(cookieParser())
@@ -57,7 +56,7 @@ io.on('connection', (socket) => {
     // WebRTC offer
     socket.on('offer', (offer, roomId) => {
         // socket.to(roomId).emit('offer', offer);  // Send offer to the specific room
-        socket.broadcast.emit('offer', offer);  
+        socket.broadcast.emit('offer', offer);
     });
 
     // WebRTC answer
