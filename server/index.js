@@ -8,12 +8,13 @@ import cookieParser from 'cookie-parser';
 dotenv.config()
 const app = express();
 
+const allowedOrigins = ["http://localhost:3000", "https://videoostreamer.netlify.app/"]
 // Middleware
-// app.use(cors({
-//     credentials: true,  // Ensure credentials like cookies are sent
-//     origin: "http://localhost:3000",
-// }))
-app.use(cors())
+app.use(cors({
+    credentials: true,  // Ensure credentials like cookies are sent
+    origin: allowedOrigins, // Allow specific origins
+}))
+
 app.use(express.json());
 app.use(cookieParser())
 
